@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.externals.oneclicklavas
+package net.runelite.client.plugins.oneclicklavas
 
 enum class Pouches(val pouch: String) {
     LOWER("Small + Medium + Large"),

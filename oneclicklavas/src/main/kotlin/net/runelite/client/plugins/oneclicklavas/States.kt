@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.externals.oneclicklavas
+package net.runelite.client.plugins.oneclicklavas
 
 enum class States {
     IDLE,
@@ -6,12 +6,16 @@ enum class States {
     NEED_DEPOSIT,
     NEED_NECKLACE,
     DRINK_STAMINA,
-    EQUIP_NECKLACE,
-    FILL_POUCHES,
+    PREPARE_TO_TELEPORT,
     TELEPORT_FROM_BANK,
     ENTER_ALTAR,
     IMBUE,
     CRAFT_RUNES,
     EMPTY_POUCHES,
-    TELEPORT_TO_BANK
+    TELEPORT_TO_BANK,
+    NEED_ESSENCE,
+    FILL_POUCH,
+    CLOSE_BANK,
+    OPEN_BANK,
+    DESTROY_NECKLACE
 }

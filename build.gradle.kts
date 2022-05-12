@@ -8,12 +8,12 @@ plugins {
     checkstyle
 }
 
-project.extra["GithubUrl"] = ""
+project.extra["GithubUrl"] = "https://github.com/rebeccapls/Sakura"
 
 apply<BootstrapPlugin>()
 
 subprojects {
-    group = "com.example"
+    group = "com.openosrs.externals"
 
     project.extra["PluginProvider"] = "Rebecca"
     project.extra["ProjectSupportUrl"] = ""
@@ -48,11 +48,33 @@ subprojects {
             options.encoding = "UTF-8"
         }
 
+        withType<Jar> {
+            doLast {
+                copy {
+                    from("./build/libs/")
+                    into("../release/")
+                }
+            }
+        }
+
         withType<AbstractArchiveTask> {
             isPreserveFileTimestamps = false
             isReproducibleFileOrder = true
             dirMode = 493
             fileMode = 420
+        }
+
+        withType<Checkstyle> {
+            group = "verification"
+
+            exclude("**/ScriptVarType.java")
+            exclude("**/LayoutSolver.java")
+            exclude("**/RoomType.java")
+        }
+
+        register<Copy>("copyDeps") {
+            into("./build/deps/")
+            from(configurations["runtimeClasspath"])
         }
     }
 }

@@ -1,7 +1,7 @@
 package net.runelite.client.plugins.zeahcrafter
 
 import net.runelite.client.config.*
-import net.runelite.client.plugins.externals.oneclicklavas.Pouches
+import net.runelite.client.plugins.oneclicklavas.Pouches
 
 @ConfigGroup("OneClickLavas")
 interface OneClickLavasConfig : Config {

@@ -6,13 +6,13 @@ plugins {
 }
 
 version = "0.0.1"
-project.extra["PluginName"] = "One click lavas" // This is the name that is used in the external plugin manager panel
+project.extra["PluginName"] = "One Click Lavas" // This is the name that is used in the external plugin manager panel
 project.extra["PluginDescription"] = "A one click lavas test" // This is the description that is used in the external plugin manager panel
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     annotationProcessor(Libraries.lombok)
-    annotationProcessor(Libraries.pf4j)
+    kapt(Libraries.pf4j)
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
     compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
     compileOnly(Libraries.guice)
