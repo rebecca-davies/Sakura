@@ -1,7 +1,7 @@
 package net.runelite.client.plugins.zeahcrafter
 
 import net.runelite.client.config.*
-import net.runelite.client.plugins.externals.oneclicklava.Pouches
+import net.runelite.client.plugins.externals.oneclicklavas.Pouches
 
 @ConfigGroup("OneClickLavas")
 interface OneClickLavasConfig : Config {
@@ -21,7 +21,7 @@ interface OneClickLavasConfig : Config {
         name = "Select pouches",
         description = "Select the pouches you want to use",
         position = 1,
-        title = "pouchconfig")
+        title = "pouchConfig")
     fun pouch(): Pouches {
         return Pouches.COLOSSAL
     }

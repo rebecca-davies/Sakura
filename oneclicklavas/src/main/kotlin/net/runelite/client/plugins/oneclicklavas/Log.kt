@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.externals.oneclicklava
+package net.runelite.client.plugins.externals.oneclicklavas
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.externals.oneclicklava
+package net.runelite.client.plugins.externals.oneclicklavas
 
 enum class States {
     IDLE,
