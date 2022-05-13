@@ -2,7 +2,9 @@ package net.runelite.client
 
 import com.google.inject.Provides
 import net.runelite.api.*
+import net.runelite.api.events.ChatMessage
 import net.runelite.api.events.MenuOptionClicked
+import net.runelite.api.widgets.WidgetID
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
@@ -37,26 +39,8 @@ class OneClickLavasPlugin : Plugin() {
 
     companion object : Log()
 
-    var attributes = linkedMapOf("charges" to 0, "fill" to 0, "filled" to 0, "emptied" to 0)
-    var process = true
-
-    var items: Array<Item> by Delegates.observable(arrayOf()) { _, prev, curr ->
-        if(!prev.contentEquals(curr)) {
-            if(state == States.FILL_POUCH) {
-                attributes.computeIfPresent("fill") { k, v -> v + 1 }
-            }
-            if(state == States.EMPTY_POUCHES) {
-                attributes.computeIfPresent("emptied") { k, v -> v + 1 }
-            }
-        }
-    }
-
-    private var state by Delegates.observable(States.OPEN_BANK) { _, prev, curr ->
-        println("$prev $curr")
-        if (prev != curr) {
-            process = true
-        }
-    }
+    var attributes = linkedMapOf("charges" to 0, "fill" to 0, "filled" to 0, "emptied" to 0, "stamina" to 0, "repair" to 0)
+    private var process = true
 
     @Provides
     fun provideConfig(configManager: ConfigManager): OneClickLavasConfig {
@@ -77,25 +61,60 @@ class OneClickLavasPlugin : Plugin() {
         attributes["fill"] = 0
         attributes["filled"] = 0
         attributes["emptied"] = 0
+        attributes["stamina"] = 0
+        attributes["repair"] = 0
         process = true
         state = States.OPEN_BANK
+    }
+
+    private var items: Array<Item> by Delegates.observable(arrayOf()) { _, prev, curr ->
+        if(!prev.contentEquals(curr)) {
+            if(state == States.FILL_POUCH) {
+                attributes.computeIfPresent("fill") { _, v -> v + 1 }
+            }
+        }
+    }
+
+    private var state by Delegates.observable(States.OPEN_BANK) { _, prev, curr ->
+        println("$prev $curr")
+        if (prev != curr) {
+            process = true
+        }
+    }
+
+    @Subscribe
+    fun onChatMessage(event: ChatMessage) {
+        if(event.type == ChatMessageType.GAMEMESSAGE && event.message.contains("there is no essence in this pouch", true)) {
+            attributes["emptied"] = 1
+            return
+        }
+        if(event.type == ChatMessageType.GAMEMESSAGE && event.message.contains("you bind the temple", true)) {
+            attributes.computeIfPresent("charges") { _, v -> v - 1 }
+            return
+        }
     }
 
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         with(actions) {
             checkStates()
-            println("$state ${attributes["charges"]} $process ${client.banking()}")
+            println("${attributes["repair"]}")
             client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                 items = it.items
+            }
+            if(attributes["repair"]!! >= 1) {
+                event.handleMage()
+                return
             }
             if (!process) {
                 event.consume()
             }
             process = false
+
             val bank = client.findGameObject(BANK)
             val ruin = client.findGameObject(RUINS)
             val altar = client.findGameObject(ALTAR)
+
             when (state) {
                 States.TELEPORT_TO_BANK -> {
                     event.teleport()
@@ -113,11 +132,17 @@ class OneClickLavasPlugin : Plugin() {
                         return
                     }
                 }
+                States.NEED_STAMINA -> {
+                    attributes["stamina"] = 1
+                    client.getBankItem(ItemID.STAMINA_POTION1)?.let {
+                        event.clickItem(it, 2, WidgetInfo.BANK_ITEM_CONTAINER.id)
+                        return
+                    }
+                }
                 States.NEED_NECKLACE -> {
                     attributes["charges"] = -1
                     client.getBankItem(ItemID.BINDING_NECKLACE)?.let {
                         event.clickItem(it, 2, WidgetInfo.BANK_ITEM_CONTAINER.id)
-                        state = States.NEED_ESSENCE
                         return
                     }
                 }
@@ -148,7 +173,16 @@ class OneClickLavasPlugin : Plugin() {
                     return
                 }
                 States.CONFIRM_DESTROY -> {
+                    attributes["charges"] = 15
                     event.confirm()
+                    state = States.TELEPORT_FROM_BANK
+                    return
+                }
+                States.DRINK_STAMINA -> {
+                    client.getInventoryItem(ItemID.STAMINA_POTION1)?.let {
+                        attributes["stamina"] = 0
+                        event.clickItem(it, 2, WidgetInfo.INVENTORY.id)
+                    }
                     state = States.TELEPORT_FROM_BANK
                     return
                 }
@@ -180,7 +214,6 @@ class OneClickLavasPlugin : Plugin() {
                         state = States.CRAFT_RUNES
                         return
                     }
-
                 }
                 else -> return
             }
@@ -189,11 +222,20 @@ class OneClickLavasPlugin : Plugin() {
 
     private fun checkStates() {
         if(!client.banking()) {
+            if (attributes["charges"] == 0 && attributes["repair"] == 0) {
+                attributes["repair"] = 1
+                return
+            }
             if (client.mapRegions.contains(13107)) {
                 state = States.ENTER_RUINS
                 return
             }
-            if (attributes["emptied"]!! >= 2 && client.getInventoryItem(ItemID.PURE_ESSENCE) == null) {
+            if (attributes["emptied"]!! >= 1 && client.findGameObject(BANK) != null) {
+                state = States.OPEN_BANK
+                reset()
+                return
+            }
+            if (attributes["emptied"]!! >= 1 && client.getInventoryItem(ItemID.PURE_ESSENCE) == null) {
                 state = States.TELEPORT_TO_BANK
                 return
             }
@@ -202,8 +244,12 @@ class OneClickLavasPlugin : Plugin() {
                 return
             }
             if (state == States.TELEPORT_FROM_BANK) {
-                if(attributes["charges"] == -1) {
+                if(client.getInventoryItem(ItemID.BINDING_NECKLACE) != null) {
                     state = States.DESTROY_NECKLACE
+                    return
+                }
+                if(client.getInventoryItem(ItemID.STAMINA_POTION1) != null) {
+                    state = States.DRINK_STAMINA
                     return
                 }
                 return
@@ -215,12 +261,16 @@ class OneClickLavasPlugin : Plugin() {
                 state = States.CLOSE_BANK
                 return
             }
+            if(client.getBankInventoryItem(ItemID.LAVA_RUNE) != null) {
+                state = States.NEED_DEPOSIT
+                return
+            }
             if(attributes["charges"] == 0) {
                 state = States.NEED_NECKLACE
                 return
             }
-            if(client.getInventoryItem(ItemID.LAVA_RUNE) != null) {
-                state = States.NEED_DEPOSIT
+            if (attributes["stamina"] == 0 && client.getVarbitValue(25) == 0) {
+                state = States.NEED_STAMINA
                 return
             }
             if(client.getBankInventoryItem(ItemID.PURE_ESSENCE) == null) {
@@ -238,4 +288,6 @@ class OneClickLavasPlugin : Plugin() {
             }
         }
     }
+
+
 }

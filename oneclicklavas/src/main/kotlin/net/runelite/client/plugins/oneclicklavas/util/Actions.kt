@@ -3,6 +3,8 @@ package net.runelite.client.plugins.oneclicklavas.util
 import net.runelite.api.*
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.widgets.Widget
+import net.runelite.api.widgets.WidgetInfo
+import net.runelite.client.OneClickLavasPlugin
 import net.runelite.client.plugins.oneclicklavas.getInventoryItem
 import net.runelite.client.plugins.oneclicklavas.getInventorySpace
 import javax.inject.Inject
@@ -11,6 +13,9 @@ class Actions {
 
     @Inject
     lateinit var client: Client
+
+    @Inject
+    lateinit var plugin: OneClickLavasPlugin
 
     fun MenuOptionClicked.clickItem(item: Widget, action: Int, container: Int) {
         try {
@@ -117,12 +122,8 @@ class Actions {
     }
 
     fun MenuOptionClicked.useOn(gameObject: GameObject) {
-        println("hit2")
-        println("${client.getInventorySpace()}")
-        println("${client.getInventoryItem(ItemID.EARTH_RUNE)?.id}")
         try {
             client.getInventoryItem(ItemID.EARTH_RUNE)?.let {
-                println("hit3")
                 client.selectedSpellWidget = it.id
                 client.selectedSpellChildIndex = it.index
                 client.selectedSpellItemId = it.itemId
@@ -135,6 +136,70 @@ class Actions {
             }
         } catch (e: Exception) {
             this.consume()
+        }
+    }
+
+    private fun MenuOptionClicked.repair() {
+        try {
+            this.menuOption = "Cast"
+            this.menuTarget = "<col=00ff00>NPC Contact</col>"
+            this.id = 1
+            this.menuAction = MenuAction.CC_OP
+            this.param0 = -1
+            this.param1 = 14286953
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
+    private fun MenuOptionClicked.mage() {
+        try {
+            this.menuOption = "Dark Mage"
+            this.menuTarget = ""
+            this.id = 1
+            this.menuAction = MenuAction.CC_OP
+            this.param0 = -1
+            this.param1 = 4915212
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
+    private fun MenuOptionClicked.talk(param0: Int, param1: Int) {
+        try {
+            this.menuOption = "Continue"
+            this.menuTarget = ""
+            this.id = 0
+            this.menuAction = MenuAction.WIDGET_CONTINUE
+            this.param0 = param0
+            this.param1 = param1
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
+    fun MenuOptionClicked.handleMage() {
+        when (plugin.attributes["repair"]) {
+            1 -> {
+                repair()
+                plugin.attributes["repair"] = 2
+            }
+            2 -> {
+                mage()
+                plugin.attributes["repair"] = 3
+            }
+            3 -> {
+                client.getWidget(15138821)?.let {
+                    talk(-1, 15138821)
+                }
+                client.getWidget(14352385)?.let {
+                    talk(2, 14352385)
+                }
+                client.getWidget(14221317)?.let {
+                    talk(-1, 14221317)
+                    plugin.attributes["repair"] = -1
+                }
+            }
         }
     }
 }

@@ -6,7 +6,6 @@ enum class States {
     NEED_DEPOSIT,
     NEED_NECKLACE,
     DRINK_STAMINA,
-    PREPARE_TO_TELEPORT,
     TELEPORT_FROM_BANK,
     ENTER_RUINS,
     IMBUE,
@@ -18,5 +17,6 @@ enum class States {
     CLOSE_BANK,
     OPEN_BANK,
     DESTROY_NECKLACE,
-    CONFIRM_DESTROY
+    CONFIRM_DESTROY,
+    REPAIR
 }
