@@ -78,7 +78,6 @@ class OneClickLavasPlugin : Plugin() {
     }
 
     private var state by Delegates.observable(States.OPEN_BANK) { _, prev, curr ->
-        println("$prev $curr")
         if (prev != curr) {
             process = true
         }
@@ -91,6 +90,7 @@ class OneClickLavasPlugin : Plugin() {
             return
         }
         if(event.type == ChatMessageType.GAMEMESSAGE && event.message.contains("you bind the temple", true)) {
+            state = States.EMPTY_POUCHES
             attributes.computeIfPresent("charges") { _, v -> v - 1 }
             return
         }
@@ -201,7 +201,6 @@ class OneClickLavasPlugin : Plugin() {
                 States.CRAFT_RUNES -> {
                     altar?.let {
                         event.useOn(it)
-                        state = States.EMPTY_POUCHES
                     }
                 }
                 States.EMPTY_POUCHES -> {
@@ -230,7 +229,7 @@ class OneClickLavasPlugin : Plugin() {
                 reset()
                 return
             }
-            if (attributes["emptied"]!! >= 1 && client.getInventoryItem(ItemID.PURE_ESSENCE) == null) {
+            if (attributes["emptied"]!! >= 1 && state == States.CRAFT_RUNES) {
                 state = States.TELEPORT_TO_BANK
                 return
             }
