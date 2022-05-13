@@ -201,17 +201,13 @@ class OneClickLavasPlugin : Plugin() {
                 States.CRAFT_RUNES -> {
                     altar?.let {
                         event.useOn(it)
-                        if(client.localPlayer?.worldLocation!!.distanceTo(it.worldLocation) <= 3) {
-                            state = States.EMPTY_POUCHES
-                        }
+                        state = States.EMPTY_POUCHES
                     }
-                    return
                 }
                 States.EMPTY_POUCHES -> {
                     client.getInventoryItem(ItemID.COLOSSAL_POUCH)?.let {
                         event.clickItem(it, 3, WidgetInfo.INVENTORY.id)
                         state = States.CRAFT_RUNES
-                        return
                     }
                 }
                 else -> return
