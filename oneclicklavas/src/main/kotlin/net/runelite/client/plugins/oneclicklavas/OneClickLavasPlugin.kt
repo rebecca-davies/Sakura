@@ -233,6 +233,10 @@ class OneClickLavasPlugin : Plugin() {
                 state = States.TELEPORT_TO_BANK
                 return
             }
+            if (client.mapRegions.contains(10315) && state != States.CRAFT_RUNES && client.getVarbitValue(5438) == 0) {
+                state = States.CRAFT_RUNES
+                return
+            }
             if (client.mapRegions.contains(10315) && client.getVarbitValue(5438) == 0) {
                 state = States.IMBUE
                 return
