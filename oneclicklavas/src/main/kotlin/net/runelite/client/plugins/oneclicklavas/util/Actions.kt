@@ -197,7 +197,8 @@ class Actions {
                 }
                 client.getWidget(14221317)?.let {
                     talk(-1, 14221317)
-                    plugin.attributes["repair"] = -1
+                    plugin.attributes["repair"] = 0
+                    plugin.repaired = true
                 }
             }
         }

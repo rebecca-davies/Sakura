@@ -41,6 +41,7 @@ class OneClickLavasPlugin : Plugin() {
 
     var attributes = linkedMapOf("charges" to 0, "fill" to 0, "filled" to 0, "emptied" to 0, "stamina" to 0, "repair" to 0)
     private var process = true
+    var repaired = false
 
     @Provides
     fun provideConfig(configManager: ConfigManager): OneClickLavasConfig {
@@ -50,6 +51,8 @@ class OneClickLavasPlugin : Plugin() {
     override fun startUp() {
         log.info("Starting One click lavas")
         attributes["charges"] = 0
+        attributes["repair"] = 0
+        repaired = true
         reset()
     }
 
@@ -62,7 +65,6 @@ class OneClickLavasPlugin : Plugin() {
         attributes["filled"] = 0
         attributes["emptied"] = 0
         attributes["stamina"] = 0
-        attributes["repair"] = 0
         process = true
         state = States.OPEN_BANK
     }
@@ -98,7 +100,6 @@ class OneClickLavasPlugin : Plugin() {
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         with(actions) {
             checkStates()
-            println("${attributes["repair"]}")
             client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                 items = it.items
             }
@@ -198,13 +199,11 @@ class OneClickLavasPlugin : Plugin() {
                     return
                 }
                 States.CRAFT_RUNES -> {
-                    if (client.getInventoryItem(ItemID.PURE_ESSENCE) != null) {
-                        altar?.let { event.useOn(it) }
-                        return
-                    }
-                    if (client.getInventoryItem(ItemID.PURE_ESSENCE) == null) {
-                        state = States.EMPTY_POUCHES
-                        return
+                    altar?.let {
+                        event.useOn(it)
+                        if(client.localPlayer?.worldLocation!!.distanceTo(it.worldLocation) <= 3) {
+                            state = States.EMPTY_POUCHES
+                        }
                     }
                     return
                 }
@@ -222,7 +221,7 @@ class OneClickLavasPlugin : Plugin() {
 
     private fun checkStates() {
         if(!client.banking()) {
-            if (attributes["charges"] == 0 && attributes["repair"] == 0) {
+            if (!repaired && attributes["repair"] == 0) {
                 attributes["repair"] = 1
                 return
             }
@@ -267,6 +266,7 @@ class OneClickLavasPlugin : Plugin() {
             }
             if(attributes["charges"] == 0) {
                 state = States.NEED_NECKLACE
+                repaired = false
                 return
             }
             if (attributes["stamina"] == 0 && client.getVarbitValue(25) == 0) {
