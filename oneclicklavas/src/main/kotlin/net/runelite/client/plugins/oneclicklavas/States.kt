@@ -8,7 +8,7 @@ enum class States {
     DRINK_STAMINA,
     PREPARE_TO_TELEPORT,
     TELEPORT_FROM_BANK,
-    ENTER_ALTAR,
+    ENTER_RUINS,
     IMBUE,
     CRAFT_RUNES,
     EMPTY_POUCHES,
@@ -17,5 +17,6 @@ enum class States {
     FILL_POUCH,
     CLOSE_BANK,
     OPEN_BANK,
-    DESTROY_NECKLACE
+    DESTROY_NECKLACE,
+    CONFIRM_DESTROY
 }

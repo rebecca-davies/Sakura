@@ -52,7 +52,7 @@ subprojects {
             doLast {
                 copy {
                     from("./build/libs/")
-                    into("../release/")
+                    into("${System.getProperty("user.home")}/.openosrs/plugins")
                 }
             }
         }
@@ -66,10 +66,6 @@ subprojects {
 
         withType<Checkstyle> {
             group = "verification"
-
-            exclude("**/ScriptVarType.java")
-            exclude("**/LayoutSolver.java")
-            exclude("**/RoomType.java")
         }
 
         register<Copy>("copyDeps") {
