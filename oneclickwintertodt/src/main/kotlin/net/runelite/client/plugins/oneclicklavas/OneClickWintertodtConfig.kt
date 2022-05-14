@@ -1,28 +1,8 @@
 package net.runelite.client.plugins.zeahcrafter
 
 import net.runelite.client.config.*
-import net.runelite.client.plugins.oneclicklavas.Pouches
 
-@ConfigGroup("OneClickLavas")
-interface OneClickLavasConfig : Config {
+@ConfigGroup("OneClickWintertodt")
+interface OneClickWintertodtConfig : Config
 
-    companion object {
-        @JvmField
-        @ConfigTitle(
-            keyName = "pouchConfig",
-            name = "Configuration",
-            description = "Configure your plugins settings to suit your needs",
-            position = 0)
-        val pouchConfig: String = "pouchConfig"
-    }
 
-    @ConfigItem(
-        keyName = "pouch",
-        name = "Select pouches",
-        description = "Select the pouches you want to use",
-        position = 1,
-        title = "pouchConfig")
-    fun pouch(): Pouches {
-        return Pouches.COLOSSAL
-    }
-}

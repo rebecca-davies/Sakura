@@ -1,5 +1,15 @@
 package net.runelite.client.plugins.oneclicklavas.magic
 
-val BANK = 14886
-val RUINS = 34817
-val ALTAR = 34764
+val BANK = 29321
+val DOOR = 29322
+val BANK_REGION = 6461
+val LOBBY_REGION = 6462
+val HAMMER_CRATE = 29316
+val KNIFE_CRATE = 29317
+val TINDERBOX_CRATE = 29319
+val LIT_BRAZIER = 29314
+val UNLIT_BRAZIER = 29312
+val INTERFACE_TEXT = 25952259
+val LOG = 20695
+val KINDLING = 20696
+val ROOT = 29311

@@ -38,6 +38,15 @@ fun Client.getInventoryItem(id: Int): Widget? {
     return getWidgetItem(id, inventoryWidget)
 }
 
+fun Client.inventoryQuantity(id: Int) : Int {
+    val inventoryWidget: Widget? = this.getWidget(WidgetInfo.INVENTORY)
+    if (inventoryWidget != null) {
+        val items = inventoryWidget.dynamicChildren ?: return 0
+        return items.filter { it.itemId == id }.size
+    }
+    return 0
+}
+
 fun getWidgetItem(id: Int, inventoryWidget: Widget?): Widget? {
     if (inventoryWidget != null) {
         val items = inventoryWidget.dynamicChildren ?: return null
@@ -63,8 +72,17 @@ fun Client.isBankInventoryFull(): Boolean {
     return false
 }
 
-fun Client.getInventorySpace(): Int {
+fun Client.getBankInventorySpace(): Int {
     val inventoryWidget: Widget? = this.getWidget(WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER)
+    return if (inventoryWidget != null) {
+        28 - inventoryWidget.dynamicChildren.filter { it.itemId != 6512 }.size
+    } else {
+        -1
+    }
+}
+
+fun Client.getInventorySpace(): Int {
+    val inventoryWidget: Widget? = this.getWidget(WidgetInfo.INVENTORY)
     return if (inventoryWidget != null) {
         28 - inventoryWidget.dynamicChildren.filter { it.itemId != 6512 }.size
     } else {

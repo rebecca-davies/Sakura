@@ -4,7 +4,6 @@ import com.google.inject.Provides
 import net.runelite.api.*
 import net.runelite.api.events.ChatMessage
 import net.runelite.api.events.MenuOptionClicked
-import net.runelite.api.widgets.WidgetID
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
@@ -243,7 +242,7 @@ class OneClickLavasPlugin : Plugin() {
                 reset()
                 return
             }
-            if (attributes["emptied"]!! >= 1 && state == States.CRAFT_RUNES) {
+            if (attributes["emptied"]!! >= 1 && state == States.CRAFT_RUNES && client.localPlayer!!.animation != 714) {
                 state = States.TELEPORT_TO_BANK
                 return
             }

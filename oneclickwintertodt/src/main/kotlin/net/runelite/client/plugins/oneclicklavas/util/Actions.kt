@@ -3,10 +3,8 @@ package net.runelite.client.plugins.oneclicklavas.util
 import net.runelite.api.*
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.widgets.Widget
-import net.runelite.api.widgets.WidgetInfo
-import net.runelite.client.OneClickLavasPlugin
+import net.runelite.client.OneClickWintertodtPlugin
 import net.runelite.client.plugins.oneclicklavas.getInventoryItem
-import net.runelite.client.plugins.oneclicklavas.getInventorySpace
 import javax.inject.Inject
 
 class Actions {
@@ -15,7 +13,7 @@ class Actions {
     lateinit var client: Client
 
     @Inject
-    lateinit var plugin: OneClickLavasPlugin
+    lateinit var plugin: OneClickWintertodtPlugin
 
     fun MenuOptionClicked.clickItem(item: Widget, action: Int, container: Int) {
         try {
@@ -43,45 +41,6 @@ class Actions {
         }
     }
 
-    fun MenuOptionClicked.rub() {
-        try {
-            this.menuOption = "Fire Altar"
-            this.menuTarget = "<col=ff9040>Ring of the elements</col>"
-            this.id = 6
-            this.menuAction = MenuAction.CC_OP_LOW_PRIORITY
-            this.param0 = -1
-            this.param1 = 25362456
-        } catch (e: Exception) {
-            this.consume()
-        }
-    }
-
-    fun MenuOptionClicked.teleport() {
-        try {
-            this.menuOption = "Teleport"
-            this.menuTarget = "<col=ff9040>Crafting cape(t)</col>"
-            this.id = 3
-            this.menuAction = MenuAction.CC_OP
-            this.param0 = -1
-            this.param1 = 25362448
-        } catch (e: Exception) {
-            this.consume()
-        }
-    }
-
-    fun MenuOptionClicked.imbue() {
-        try {
-            this.menuOption = "Cast"
-            this.menuTarget = "<col=00ff00>Magic Imbue</col>"
-            this.id = 1
-            this.menuAction = MenuAction.CC_OP
-            this.param0 = -1
-            this.param1 = 14286973
-        } catch (e: Exception) {
-            this.consume()
-        }
-    }
-
     fun MenuOptionClicked.use(gameObject: GameObject) {
         try {
             this.menuOption = ""
@@ -90,32 +49,6 @@ class Actions {
             this.menuAction = MenuAction.GAME_OBJECT_FIRST_OPTION
             this.param0 = gameObject.sceneMinLocation.x
             this.param1 = gameObject.sceneMinLocation.y
-        } catch (e: Exception) {
-            this.consume()
-        }
-    }
-
-    fun MenuOptionClicked.destroy() {
-        try {
-            this.menuOption = "Destroy"
-            this.menuTarget = "<col=ff9040>Binding necklace</col>"
-            this.id = 7
-            this.menuAction = MenuAction.CC_OP_LOW_PRIORITY
-            this.param0 = 2
-            this.param1 = 9764864
-        } catch (e: Exception) {
-            this.consume()
-        }
-    }
-
-    fun MenuOptionClicked.confirm() {
-        try {
-            this.menuOption = "Yes"
-            this.menuTarget = ""
-            this.id = 1
-            this.menuAction = MenuAction.CC_OP
-            this.param0 = -1
-            this.param1 = 38273025
         } catch (e: Exception) {
             this.consume()
         }
@@ -139,35 +72,27 @@ class Actions {
         }
     }
 
-    private fun MenuOptionClicked.repair() {
+    fun MenuOptionClicked.useOn(item: Widget) {
         try {
-            this.menuOption = "Cast"
-            this.menuTarget = "<col=00ff00>NPC Contact</col>"
-            this.id = 1
-            this.menuAction = MenuAction.CC_OP
-            this.param0 = -1
-            this.param1 = 14286953
+            client.getInventoryItem(ItemID.KNIFE)?.let {
+                client.selectedSpellWidget = it.id
+                client.selectedSpellChildIndex = it.index
+                client.selectedSpellItemId = it.itemId
+                this.menuOption = "Use"
+                this.menuTarget = "<col=ff9040>Knife</col><col=ffffff> -> <col=ff9040>Bruma root</col>"
+                this.id = 0
+                this.menuAction = MenuAction.WIDGET_TARGET_ON_WIDGET
+                this.param0 = item.index
+                this.param1 = 9764864
+            }
         } catch (e: Exception) {
             this.consume()
         }
     }
 
-    private fun MenuOptionClicked.mage() {
+    fun MenuOptionClicked.talk(param0: Int, param1: Int) {
         try {
-            this.menuOption = "Dark Mage"
-            this.menuTarget = ""
-            this.id = 1
-            this.menuAction = MenuAction.CC_OP
-            this.param0 = -1
-            this.param1 = 4915212
-        } catch (e: Exception) {
-            this.consume()
-        }
-    }
-
-    private fun MenuOptionClicked.talk(param0: Int, param1: Int) {
-        try {
-            this.menuOption = "Continue"
+            this.menuOption = ""
             this.menuTarget = ""
             this.id = 0
             this.menuAction = MenuAction.WIDGET_CONTINUE
@@ -175,35 +100,6 @@ class Actions {
             this.param1 = param1
         } catch (e: Exception) {
             this.consume()
-        }
-    }
-
-    fun MenuOptionClicked.handleMage() {
-        when (plugin.attributes["repair"]) {
-            1 -> {
-                repair()
-                plugin.attributes["repair"] = 2
-            }
-            2 -> {
-                mage()
-                plugin.attributes["repair"] = 3
-            }
-            3 -> {
-                client.getWidget(15138821)?.let {
-                    talk(-1, 15138821)
-                }
-
-                client.getWidget(14352385)?.dynamicChildren?.forEachIndexed { index, widget ->
-                        if(widget.text.contains("repair", true)) {
-                            talk(index, 14352385)
-                        }
-                    }
-                client.getWidget(14221317)?.let {
-                    talk(-1, 14221317)
-                    plugin.attributes["repair"] = 0
-                    plugin.repaired = true
-                }
-            }
         }
     }
 }
