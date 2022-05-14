@@ -192,9 +192,12 @@ class Actions {
                 client.getWidget(15138821)?.let {
                     talk(-1, 15138821)
                 }
-                client.getWidget(14352385)?.let {
-                    talk(2, 14352385)
-                }
+
+                client.getWidget(14352385)?.dynamicChildren?.forEachIndexed { index, widget ->
+                        if(widget.text.contains("repair", true)) {
+                            talk(index, 14352385)
+                        }
+                    }
                 client.getWidget(14221317)?.let {
                     talk(-1, 14221317)
                     plugin.attributes["repair"] = 0

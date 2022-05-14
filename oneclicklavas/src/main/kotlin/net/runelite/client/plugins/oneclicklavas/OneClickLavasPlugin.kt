@@ -71,14 +71,17 @@ class OneClickLavasPlugin : Plugin() {
 
     private var items: Array<Item> by Delegates.observable(arrayOf()) { _, prev, curr ->
         if(!prev.contentEquals(curr)) {
-            if(state == States.FILL_POUCH) {
+           /* if(state == States.FILL_POUCH) {
                 attributes.computeIfPresent("fill") { _, v -> v + 1 }
-            }
+            }*/
         }
     }
 
     private var state by Delegates.observable(States.OPEN_BANK) { _, prev, curr ->
         if (prev != curr) {
+            if(curr == States.FILL_POUCH) {
+                attributes.computeIfPresent("fill") { _, v -> v + 1 }
+            }
             process = true
         }
     }
@@ -107,7 +110,7 @@ class OneClickLavasPlugin : Plugin() {
                 event.handleMage()
                 return
             }
-            if (!process) {
+            if (!process || event.menuOption.contains("walk here", true)) {
                 event.consume()
             }
             process = false
@@ -176,7 +179,7 @@ class OneClickLavasPlugin : Plugin() {
                 States.CONFIRM_DESTROY -> {
                     attributes["charges"] = 15
                     event.confirm()
-                    state = States.TELEPORT_FROM_BANK
+                    state = States.ENTER_RUINS
                     return
                 }
                 States.DRINK_STAMINA -> {
@@ -184,7 +187,7 @@ class OneClickLavasPlugin : Plugin() {
                         attributes["stamina"] = 0
                         event.clickItem(it, 2, WidgetInfo.INVENTORY.id)
                     }
-                    state = States.TELEPORT_FROM_BANK
+                    state = States.ENTER_RUINS
                     return
                 }
                 States.ENTER_RUINS -> {
@@ -220,7 +223,18 @@ class OneClickLavasPlugin : Plugin() {
                 attributes["repair"] = 1
                 return
             }
-            if (client.mapRegions.contains(13107)) {
+            if (client.mapRegions.contains(13107) && state == States.ENTER_RUINS) {
+                if(client.getInventoryItem(ItemID.BINDING_NECKLACE) != null) {
+                    state = States.DESTROY_NECKLACE
+                    return
+                }
+                if(client.getInventoryItem(ItemID.STAMINA_POTION1) != null) {
+                    state = States.DRINK_STAMINA
+                    return
+                }
+                return
+            }
+            if (client.mapRegions.contains(13107) && !client.localPlayer!!.isMoving) {
                 state = States.ENTER_RUINS
                 return
             }
@@ -242,14 +256,6 @@ class OneClickLavasPlugin : Plugin() {
                 return
             }
             if (state == States.TELEPORT_FROM_BANK) {
-                if(client.getInventoryItem(ItemID.BINDING_NECKLACE) != null) {
-                    state = States.DESTROY_NECKLACE
-                    return
-                }
-                if(client.getInventoryItem(ItemID.STAMINA_POTION1) != null) {
-                    state = States.DRINK_STAMINA
-                    return
-                }
                 return
             }
         }
