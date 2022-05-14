@@ -2,7 +2,8 @@
 
 ### Included Plugins 
 
-- One click lavas *(wip)*
+- One click lavas
+- One Click Wintertodt
 
 ###### TODO readme
 
