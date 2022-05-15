@@ -1,5 +1,7 @@
 package net.runelite.client.plugins.oneclicklavas.magic
 
+import net.runelite.api.coords.WorldPoint
+
 val BANK = 29321
 val DOOR = 29322
 val BANK_REGION = 6461
@@ -13,3 +15,8 @@ val INTERFACE_TEXT = 25952259
 val LOG = 20695
 val KINDLING = 20696
 val ROOT = 29311
+val SE = WorldPoint(1639, 3998, 0)
+val SW = WorldPoint(1621, 3998, 0)
+val SE_PYROMANCER = WorldPoint(1641, 3996, 0)
+val SE_ROOT = WorldPoint(1639, 3988, 0)
+val SW_ROOT = WorldPoint(1639, 3998, 0)

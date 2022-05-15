@@ -87,7 +87,7 @@ class OneClickWintertodtPlugin : Plugin() {
             client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                 items = it.items
             }
-            if (!process || event.menuOption.contains("walk here", true)) {
+            if (!process) {
                 event.consume()
             }
             process = false
@@ -97,20 +97,39 @@ class OneClickWintertodtPlugin : Plugin() {
             val hammerCrate = client.findGameObject(HAMMER_CRATE)
             val tinderboxCrate = client.findGameObject(TINDERBOX_CRATE)
             val knifeCrate = client.findGameObject(KNIFE_CRATE)
-            val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeUnless { it.worldLocation == WorldPoint(1639, 4016, 0) || it.worldLocation == WorldPoint(1621, 4016, 0) }
-            val lit = client.findGameObject(LIT_BRAZIER)?.takeUnless { it.worldLocation == WorldPoint(1639, 4016, 0) || it.worldLocation == WorldPoint(1621, 4016, 0) }
-            val roots = client.findGameObject(ROOT)
+            val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == SE }
+            val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == SE }
+            val roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == SE_ROOT }
 
 
             when (state) {
+                States.WITHDRAW_FOOD -> {
+                    client.getBankItem(ItemID.SHARK)?.let {
+                        event.clickItem(it, 4, WidgetInfo.BANK_ITEM_CONTAINER.id)
+                        return
+                    }
+                }
+                States.DEPOSIT_ITEMS -> {
+                    client.getBankItem(ItemID.SUPPLY_CRATE)?.let {
+                        event.clickItem(it, 4, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
+                        return
+                    }
+                }
                 States.EAT -> {
-                    client.getInventoryItem(ItemID.SHARK)?.let {
-                        event.clickItem(it, 2, WidgetInfo.INVENTORY.id)
+                    val shark = client.getInventoryItem(ItemID.SHARK)
+                    if(shark != null) {
+                        event.clickItem(shark, 2, WidgetInfo.INVENTORY.id)
                         return
                     }
                     state = States.PREPARE
-                    attributes["restock"] = 1
                     return
+                }
+                States.RETURN_INSIDE -> {
+                    door?.let {
+                        event.use(it)
+                        state = States.IDLE
+                        return
+                    }
                 }
                 States.PREPARE -> {
                     door?.let {
@@ -178,99 +197,100 @@ class OneClickWintertodtPlugin : Plugin() {
     }
 
     private fun checkStates() {
-        val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeUnless { it.worldLocation == WorldPoint(1639, 4016, 0) || it.worldLocation == WorldPoint(1621, 4016, 0) }
-        val lit = client.findGameObject(LIT_BRAZIER)?.takeUnless { it.worldLocation == WorldPoint(1639, 4016, 0) || it.worldLocation == WorldPoint(1621, 4016, 0) }
+        val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == SE }
+        val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == SE }
         val bank = client.findGameObject(BANK)
 
-        if(client.getBoostedSkillLevel(Skill.HITPOINTS) <= (client.getRealSkillLevel(Skill.HITPOINTS) / 2.5)) {
+        if(state == States.PREPARE) {
+            return
+        }
+
+        if(client.getBoostedSkillLevel(Skill.HITPOINTS) <= (client.getRealSkillLevel(Skill.HITPOINTS) / 2.5) && client.getInventoryItem(ItemID.SHARK) != null) {
             state = States.EAT
             return
         }
 
-        if(state == States.WOODCUTTING && client.localPlayer!!.animation == -1) {
-            state = States.WOODCUTTING
-            process = true
-            return
-        }
-        if(state == States.FLETCHING && client.localPlayer!!.animation == -1) {
-            state = States.FLETCHING
-            process = true
-            return
-        }
-
-        if(client.localPlayer!!.worldLocation.regionID == LOBBY_REGION) {
-            if(client.getInventoryItem(ItemID.HAMMER) == null) {
-                state = States.NEED_HAMMER
-                return
-            }
-            if(client.getInventoryItem(ItemID.KNIFE) == null) {
-                state = States.NEED_KNIFE
-                return
-            }
-            if(client.getInventoryItem(ItemID.TINDERBOX) == null) {
-                state = States.NEED_TINDERBOX
-                return
-            }
-        }
-
-        if(!client.banking()) {
-            if(client.localPlayer!!.worldLocation.regionID == BANK_REGION && attributes["restock"] == 1) {
+        when(client.localPlayer!!.worldLocation.regionID) {
+            BANK_REGION -> {
+                if(client.banking()) {
+                    if(client.getBankInventoryItem(ItemID.SHARK) == null) {
+                        state = States.WITHDRAW_FOOD
+                        return
+                    }
+                    if(client.getBankInventoryItem(ItemID.SUPPLY_CRATE) != null) {
+                        state = States.DEPOSIT_ITEMS
+                        return
+                    }
+                }
                 bank?.let {
-                    state = States.BANK
+                    if(client.getInventoryItem(ItemID.SHARK) == null || client.getInventoryItem(ItemID.SUPPLY_CRATE) != null) {
+                        state = States.BANK
+                        return
+                    }
+                }
+                state = States.RETURN_INSIDE
+                return
+            }
+            LOBBY_REGION -> {
+                if(state == States.CONFIRM) {
+                    if(client.getWidget(14352385) != null) {
+                        process = true
+                    } else {
+                        return
+                    }
                     return
                 }
-            }
-            if(attributes["restock"] == 1 && state == States.CONFIRM && client.localPlayer!!.worldLocation.regionID == LOBBY_REGION) {
-                process = true
-                return
-            }
-            if(state == States.LIGHT_BRAZIER && client.localPlayer!!.interacting == unlit) {
-                return
-            }
-            if(unlit != null && (state == States.FIREMAKING || state == States.GO_TO_BRAZIER) && client.localPlayer!!.interacting != lit) {
-                state = States.LIGHT_BRAZIER
-                return
-            }
-            if(client.getWidget(INTERFACE_TEXT)?.text!!.contains("0:00", true)) {
-                state = States.LIGHT_BRAZIER
-                gameStarted = true
-                return
-            }
-            if(client.getWidget(INTERFACE_TEXT)?.text!!.contains("returns in", true)) {
-                state = States.GO_TO_BRAZIER
-                gameStarted = false
-                return
-            }
-            if(client.getInventoryItem(KINDLING) != null && client.getInventoryItem(LOG) == null) {
-                if(client.localPlayer!!.interacting == null) {
+                if(state == States.LIGHT_BRAZIER && unlit != null) {
+                    return
+                }
+                if(client.getInventoryItem(ItemID.HAMMER) == null) {
+                    state = States.NEED_HAMMER
+                    return
+                }
+                if(client.getInventoryItem(ItemID.KNIFE) == null) {
+                    state = States.NEED_KNIFE
+                    return
+                }
+                if(client.getInventoryItem(ItemID.TINDERBOX) == null) {
+                    state = States.NEED_TINDERBOX
+                    return
+                }
+                if(gameStarted && state == States.GO_TO_BRAZIER && client.getWidget(INTERFACE_TEXT)!!.text.isEmpty()) {
+                    state = States.LIGHT_BRAZIER
+                    return
+                }
+                if(client.getWidget(INTERFACE_TEXT)?.text!!.contains("0:00", true)) {
+                    gameStarted = true
+                    return
+                }
+                if(client.getWidget(INTERFACE_TEXT)?.text!!.contains("returns in", true)) {
+                    state = States.GO_TO_BRAZIER
+                    gameStarted = false
+                    return
+                }
+                if(unlit != null && (state == States.FIREMAKING || state == States.GO_TO_BRAZIER)) {
+                    state = States.LIGHT_BRAZIER
+                    return
+                }
+                if(client.getInventoryItem(KINDLING) != null && client.getInventoryItem(LOG) == null) {
+                    state = States.FIREMAKING
+                    return
+                }
+                if((state == States.WOODCUTTING || state == States.FLETCHING) && client.localPlayer!!.animation == -1) {
                     process = true
                     return
                 }
-                state = States.FIREMAKING
-                return
-            }
-            if(state == States.FLETCHING && client.getInventoryItem(LOG) != null) {
-                state = States.FLETCHING
-                return
-            }
-            if(client.getInventoryItem(LOG) != null && (client.getInventorySpace() <= 0 || client.inventoryQuantity(LOG) >= 10)) {
-                state = States.FLETCHING
-                return
-            }
-            if(client.getInventoryItem(LOG) == null && client.getInventoryItem(KINDLING) == null) {
+                if(client.getInventoryItem(LOG) != null && (client.getInventorySpace() <= 0 || (client.inventoryQuantity(LOG) + client.inventoryQuantity(KINDLING)) >= 10)) {
+                    state = States.FLETCHING
+                    return
+                }
+                if(client.getInventoryItem(LOG) == null && client.getInventoryItem(KINDLING) == null) {
+                    state = States.WOODCUTTING
+                    return
+                }
                 state = States.WOODCUTTING
                 return
             }
-            if(!gameStarted && lit != null) {
-                gameStarted = true
-                state = States.WOODCUTTING
-                process = true
-                return
-            }
-            state = States.WOODCUTTING
-            return
-        }
-        if (client.banking()) {
         }
     }
 }

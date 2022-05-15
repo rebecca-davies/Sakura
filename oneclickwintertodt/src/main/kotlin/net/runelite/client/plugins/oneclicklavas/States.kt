@@ -16,5 +16,7 @@ enum class States {
     PREPARE,
     CONFIRM,
     BANK,
+    WITHDRAW_FOOD,
+    RETURN_INSIDE
 
 }
