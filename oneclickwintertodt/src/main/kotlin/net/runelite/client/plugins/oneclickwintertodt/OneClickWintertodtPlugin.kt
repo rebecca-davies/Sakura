@@ -105,7 +105,6 @@ class OneClickWintertodtPlugin : Plugin() {
             val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
             val roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == if(se) SE_ROOT else SW_ROOT }
             val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
-            println("test ${roots!!.id}")
             when (state) {
                 States.REPAIR -> {
                     broken?.let {
@@ -120,8 +119,8 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                 }
                 States.DEPOSIT_ITEMS -> {
-                    client.getBankItem(ItemID.SUPPLY_CRATE)?.let {
-                        event.clickItem(it, 4, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
+                    client.getBankInventoryItem(ItemID.SUPPLY_CRATE)?.let {
+                        event.clickItem(it, 3, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
                         return
                     }
                 }
