@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclicklavas.magic
+package net.runelite.client.plugins.oneclickwintertodt.magic
 
 import net.runelite.api.coords.WorldPoint
 

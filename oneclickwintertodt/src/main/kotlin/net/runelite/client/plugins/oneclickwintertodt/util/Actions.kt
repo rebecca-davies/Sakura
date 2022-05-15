@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclicklavas.util
+package net.runelite.client.plugins.oneclickwintertodt.util
 
 import net.runelite.api.*
 import net.runelite.api.events.MenuOptionClicked
