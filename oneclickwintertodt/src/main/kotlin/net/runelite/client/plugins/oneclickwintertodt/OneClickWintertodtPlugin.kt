@@ -5,6 +5,8 @@ import net.runelite.api.*
 import net.runelite.api.events.ChatMessage
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
+import net.runelite.api.widgets.Widget
+import net.runelite.api.widgets.WidgetID
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
@@ -40,8 +42,9 @@ class OneClickWintertodtPlugin : Plugin() {
     companion object : Log()
 
     var attributes = linkedMapOf("restock" to 0)
-    private var process = true
+    var process = true
     private var gameStarted = true
+    var se = true
 
     @Provides
     fun provideConfig(configManager: ConfigManager): OneClickWintertodtConfig {
@@ -62,6 +65,7 @@ class OneClickWintertodtPlugin : Plugin() {
         gameStarted = false
         attributes["restock"] = 0
         state = States.IDLE
+        se = true
     }
 
     private var items: Array<Item> by Delegates.observable(arrayOf()) { _, prev, curr ->
@@ -82,8 +86,9 @@ class OneClickWintertodtPlugin : Plugin() {
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         with(actions) {
+            se = client.findNpc(DOWNED_PYROMANCER)?.worldLocation != SE_PYROMANCER
             checkStates()
-            println("$state")
+            println("$se $state")
             client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                 items = it.items
             }
@@ -91,94 +96,98 @@ class OneClickWintertodtPlugin : Plugin() {
                 event.consume()
             }
             process = false
-
-            val bank = client.findGameObject(net.runelite.client.plugins.oneclickwintertodt.magic.BANK)
-            val door = client.findGameObject(net.runelite.client.plugins.oneclickwintertodt.magic.DOOR)
-            val hammerCrate = client.findGameObject(net.runelite.client.plugins.oneclickwintertodt.magic.HAMMER_CRATE)
-            val tinderboxCrate = client.findGameObject(net.runelite.client.plugins.oneclickwintertodt.magic.TINDERBOX_CRATE)
-            val knifeCrate = client.findGameObject(net.runelite.client.plugins.oneclickwintertodt.magic.KNIFE_CRATE)
-            val unlit = client.findGameObject(net.runelite.client.plugins.oneclickwintertodt.magic.UNLIT_BRAZIER)?.takeIf { it.worldLocation == net.runelite.client.plugins.oneclickwintertodt.magic.SE }
-            val lit = client.findGameObject(net.runelite.client.plugins.oneclickwintertodt.magic.LIT_BRAZIER)?.takeIf { it.worldLocation == net.runelite.client.plugins.oneclickwintertodt.magic.SE }
-            val roots = client.findGameObject(net.runelite.client.plugins.oneclickwintertodt.magic.ROOT)?.takeIf { it.worldLocation == net.runelite.client.plugins.oneclickwintertodt.magic.SE_ROOT }
-
-
+            val bank = client.findGameObject(BANK)
+            val door = client.findGameObject(DOOR)
+            val hammerCrate = client.findGameObject(HAMMER_CRATE)
+            val tinderboxCrate = client.findGameObject(TINDERBOX_CRATE)
+            val knifeCrate = client.findGameObject(KNIFE_CRATE)
+            val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
+            val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
+            val roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == if(se) SE_ROOT else SW_ROOT }
+            val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
+            println("test ${roots!!.id}")
             when (state) {
-                net.runelite.client.plugins.oneclickwintertodt.States.WITHDRAW_FOOD -> {
+                States.REPAIR -> {
+                    broken?.let {
+                        event.use(it)
+                        return
+                    }
+                }
+                States.WITHDRAW_FOOD -> {
                     client.getBankItem(ItemID.SHARK)?.let {
                         event.clickItem(it, 4, WidgetInfo.BANK_ITEM_CONTAINER.id)
                         return
                     }
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.DEPOSIT_ITEMS -> {
+                States.DEPOSIT_ITEMS -> {
                     client.getBankItem(ItemID.SUPPLY_CRATE)?.let {
                         event.clickItem(it, 4, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
                         return
                     }
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.EAT -> {
+                States.EAT -> {
                     val shark = client.getInventoryItem(ItemID.SHARK)
                     if(shark != null) {
                         event.clickItem(shark, 2, WidgetInfo.INVENTORY.id)
                         return
                     }
-                    state = net.runelite.client.plugins.oneclickwintertodt.States.PREPARE
+                    state = States.PREPARE
                     return
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.RETURN_INSIDE -> {
+                States.RETURN_INSIDE -> {
                     door?.let {
                         event.use(it)
-                        state = net.runelite.client.plugins.oneclickwintertodt.States.IDLE
                         return
                     }
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.PREPARE -> {
+                States.PREPARE -> {
                     door?.let {
                         event.use(it)
-                        state = net.runelite.client.plugins.oneclickwintertodt.States.CONFIRM
+                        state = States.CONFIRM
                         return
                     }
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.CONFIRM -> {
+                States.CONFIRM -> {
                     event.talk(1, 14352385)
                     return
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.NEED_HAMMER -> {
+                States.NEED_HAMMER -> {
                     event.use(hammerCrate!!)
                     return
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.NEED_KNIFE -> {
+                States.NEED_KNIFE -> {
                     event.use(knifeCrate!!)
                     return
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.NEED_TINDERBOX -> {
+                States.NEED_TINDERBOX -> {
                     event.use(tinderboxCrate!!)
                     return
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.LIGHT_BRAZIER, net.runelite.client.plugins.oneclickwintertodt.States.GO_TO_BRAZIER -> {
+                States.LIGHT_BRAZIER, States.GO_TO_BRAZIER -> {
                     unlit?.let {
                         event.use(it)
                         return
                     }
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.FIREMAKING -> {
+                States.FIREMAKING -> {
                     lit?.let {
                         event.use(it)
                         return
                     }
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.WOODCUTTING -> {
+                States.WOODCUTTING -> {
                     roots?.let {
                         event.use(it)
                         return
                     }
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.FLETCHING -> {
-                    client.getInventoryItem(net.runelite.client.plugins.oneclickwintertodt.magic.LOG)?.let {
+                States.FLETCHING -> {
+                    client.getInventoryItem(LOG)?.let {
                         event.useOn(it)
                         return
                     }
                 }
-                net.runelite.client.plugins.oneclickwintertodt.States.BANK -> {
+                States.BANK -> {
                     bank?.let {
                         event.use(it)
                         return
@@ -197,8 +206,9 @@ class OneClickWintertodtPlugin : Plugin() {
     }
 
     private fun checkStates() {
-        val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == SE }
-        val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == SE }
+        val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
+        val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
+        val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
         val bank = client.findGameObject(BANK)
 
         if(state == States.PREPARE) {
@@ -224,6 +234,9 @@ class OneClickWintertodtPlugin : Plugin() {
                 }
                 bank?.let {
                     if(client.getInventoryItem(ItemID.SHARK) == null || client.getInventoryItem(ItemID.SUPPLY_CRATE) != null) {
+                        if(!client.localPlayer.isMoving) {
+                            process = true
+                        }
                         state = States.BANK
                         return
                     }
@@ -232,12 +245,24 @@ class OneClickWintertodtPlugin : Plugin() {
                 return
             }
             LOBBY_REGION -> {
+                if(client.getWidget(WINTERTODT_INTERFACE) == null) {
+                    process = true
+                }
+
                 if(state == States.CONFIRM) {
                     if(client.getWidget(14352385) != null) {
                         process = true
                     } else {
                         return
                     }
+                    return
+                }
+                if(client.getInventoryItem(ItemID.SUPPLY_CRATE) != null) {
+                    state = States.PREPARE
+                    return
+                }
+                if(state == States.FIREMAKING && broken != null) {
+                    state = States.REPAIR
                     return
                 }
                 if(state == States.LIGHT_BRAZIER && unlit != null) {
@@ -280,9 +305,7 @@ class OneClickWintertodtPlugin : Plugin() {
                     process = true
                     return
                 }
-                if(client.getInventoryItem(LOG) != null && (client.getInventorySpace() <= 0 || (client.inventoryQuantity(
-                        LOG
-                    ) + client.inventoryQuantity(KINDLING)) >= 10)) {
+                if(client.getInventoryItem(LOG) != null && (client.getInventorySpace() <= 0 || (client.inventoryQuantity(LOG) + client.inventoryQuantity(KINDLING)) >= 10)) {
                     state = States.FLETCHING
                     return
                 }
