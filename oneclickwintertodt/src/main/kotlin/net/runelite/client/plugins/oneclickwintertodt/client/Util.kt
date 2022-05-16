@@ -46,6 +46,14 @@ fun Client.getInventoryItem(id: Int): Widget? {
     return getWidgetItem(id, inventoryWidget)
 }
 
+fun Client.inventoryContains(id: List<Any>): Boolean {
+    return this.getWidget(WidgetInfo.INVENTORY)!!.dynamicChildren!!.map { it.itemId }.any(id::contains)
+}
+
+fun Client.inventoryContains(id: Int): Boolean {
+    return this.getWidget(WidgetInfo.INVENTORY)!!.dynamicChildren!!.map { it.itemId }.contains(id)
+}
+
 fun Client.inventoryQuantity(id: Int) : Int {
     val inventoryWidget: Widget? = this.getWidget(WidgetInfo.INVENTORY)
     if (inventoryWidget != null) {

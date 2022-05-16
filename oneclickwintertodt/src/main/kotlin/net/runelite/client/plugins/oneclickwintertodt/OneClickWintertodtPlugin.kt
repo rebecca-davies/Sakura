@@ -5,8 +5,6 @@ import net.runelite.api.*
 import net.runelite.api.events.ChatMessage
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
-import net.runelite.api.widgets.Widget
-import net.runelite.api.widgets.WidgetID
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
@@ -31,7 +29,7 @@ import kotlin.properties.Delegates
 class OneClickWintertodtPlugin : Plugin() {
 
     @Inject
-    lateinit var config: OneClickWintertodtConfig
+    private lateinit var config: OneClickWintertodtConfig
 
     @Inject
     lateinit var client: Client
@@ -41,18 +39,19 @@ class OneClickWintertodtPlugin : Plugin() {
 
     companion object : Log()
 
-    var attributes = linkedMapOf("restock" to 0)
-    var process = true
-    private var gameStarted = true
-    var se = true
-
     @Provides
     fun provideConfig(configManager: ConfigManager): OneClickWintertodtConfig {
         return configManager.getConfig(OneClickWintertodtConfig::class.java)
     }
 
+    var process = true
+    private var gameStarted = true
+    var se = true
+    lateinit var food: OneClickWintertodtConfig.Food
+
     override fun startUp() {
         log.info("Starting One Click Wintertodt")
+
         reset()
     }
 
@@ -63,13 +62,13 @@ class OneClickWintertodtPlugin : Plugin() {
     private fun reset() {
         process = true
         gameStarted = false
-        attributes["restock"] = 0
         state = States.IDLE
         se = true
     }
 
     private var items: Array<Item> by Delegates.observable(arrayOf()) { _, prev, curr ->
-        if(!prev.contentEquals(curr)) {
+        if(state == States.EAT) {
+            process = true
         }
     }
 
@@ -84,11 +83,17 @@ class OneClickWintertodtPlugin : Plugin() {
     }
 
     @Subscribe
+    private fun onHitsplatApplied(event: HitsplatApplied) {
+        if(event.actor == client.localPlayer) {
+            process = true
+            return
+        }
+    }
+
+    @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         with(actions) {
-            se = client.findNpc(DOWNED_PYROMANCER)?.worldLocation != SE_PYROMANCER
             checkStates()
-            println("$se $state")
             client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                 items = it.items
             }
@@ -101,11 +106,34 @@ class OneClickWintertodtPlugin : Plugin() {
             val hammerCrate = client.findGameObject(HAMMER_CRATE)
             val tinderboxCrate = client.findGameObject(TINDERBOX_CRATE)
             val knifeCrate = client.findGameObject(KNIFE_CRATE)
-            val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
-            val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
-            val roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == if(se) SE_ROOT else SW_ROOT }
-            val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
+            val vialCrate = client.findGameObject(VIAL_CRATE)
+            val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == SE_POS}
+            val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == SE_POS}
+            val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == SE_POS}
+            val roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == SE_ROOT_POS}
+            val herbPatch = client.findGameObject(HERB)?.takeIf { it.worldLocation == HERB_POS}
+
             when (state) {
+                States.HEAL_PYROMANCER -> {
+                    if(client.inventoryContains(POTIONS)) {
+                        event.heal()
+                        return
+                    }
+                    return
+                }
+                States.PICK_HERB -> {
+                    herbPatch?.let {
+                        event.use(it)
+                        return
+                    }
+                }
+                States.MIX_VIAL -> {
+                    client.getInventoryItem(HERB)?.let {
+                        event.useOn(it, client.getInventoryItem(ItemID.VIAL)!!)
+                        return
+                    }
+                    return
+                }
                 States.REPAIR -> {
                     broken?.let {
                         event.use(it)
@@ -113,7 +141,7 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                 }
                 States.WITHDRAW_FOOD -> {
-                    client.getBankItem(ItemID.SHARK)?.let {
+                    client.getBankItem(food.id)?.let {
                         event.clickItem(it, 4, WidgetInfo.BANK_ITEM_CONTAINER.id)
                         return
                     }
@@ -125,9 +153,10 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                 }
                 States.EAT -> {
-                    val shark = client.getInventoryItem(ItemID.SHARK)
-                    if(shark != null) {
-                        event.clickItem(shark, 2, WidgetInfo.INVENTORY.id)
+                    val food = client.getInventoryItem(food.id)
+                    if(food != null) {
+                        state = States.IDLE
+                        event.clickItem(food, 2, WidgetInfo.INVENTORY.id)
                         return
                     }
                     state = States.PREPARE
@@ -148,6 +177,10 @@ class OneClickWintertodtPlugin : Plugin() {
                 }
                 States.CONFIRM -> {
                     event.talk(1, 14352385)
+                    return
+                }
+                States.NEED_VIAL -> {
+                    event.use(vialCrate!!)
                     return
                 }
                 States.NEED_HAMMER -> {
@@ -182,7 +215,7 @@ class OneClickWintertodtPlugin : Plugin() {
                 }
                 States.FLETCHING -> {
                     client.getInventoryItem(LOG)?.let {
-                        event.useOn(it)
+                        event.useOn(it, client.getInventoryItem(ItemID.KNIFE)!!)
                         return
                     }
                 }
@@ -197,32 +230,30 @@ class OneClickWintertodtPlugin : Plugin() {
         }
     }
 
-    private fun onHitsplatApplied(event: HitsplatApplied) {
-        if(event.actor == client.localPlayer) {
-            process = true
-            return
-        }
-    }
-
     private fun checkStates() {
-        val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
-        val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
-        val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == if(se) SE else SW }
+        food = config.food()
+        val unlit = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == SE_POS }
+        val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == SE_POS }
+        val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == SE_POS }
         val bank = client.findGameObject(BANK)
+        food = config.food()
 
         if(state == States.PREPARE) {
             return
         }
 
-        if(client.getBoostedSkillLevel(Skill.HITPOINTS) <= (client.getRealSkillLevel(Skill.HITPOINTS) / 2.5) && client.getInventoryItem(ItemID.SHARK) != null) {
+        if(client.getBoostedSkillLevel(Skill.HITPOINTS) <= (client.getRealSkillLevel(Skill.HITPOINTS) / 2.5)) {
             state = States.EAT
             return
+        }
+        if(lit != null && !gameStarted) {
+            gameStarted = true
         }
 
         when(client.localPlayer!!.worldLocation.regionID) {
             BANK_REGION -> {
                 if(client.banking()) {
-                    if(client.getBankInventoryItem(ItemID.SHARK) == null) {
+                    if(client.getBankInventoryItem(food.id) == null) {
                         state = States.WITHDRAW_FOOD
                         return
                     }
@@ -232,7 +263,7 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                 }
                 bank?.let {
-                    if(client.getInventoryItem(ItemID.SHARK) == null || client.getInventoryItem(ItemID.SUPPLY_CRATE) != null) {
+                    if(!client.inventoryContains(food.id) || client.inventoryContains(ItemID.SUPPLY_CRATE)) {
                         if(!client.localPlayer.isMoving) {
                             process = true
                         }
@@ -244,10 +275,21 @@ class OneClickWintertodtPlugin : Plugin() {
                 return
             }
             LOBBY_REGION -> {
-                if(client.getWidget(WINTERTODT_INTERFACE) == null) {
+                if(state == States.GO_TO_BRAZIER && client.localPlayer.worldLocation.distanceTo(unlit?.worldLocation) > 3) {
                     process = true
                 }
-
+                if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(POTIONS)) {
+                    state = States.HEAL_PYROMANCER
+                    return
+                }
+                if(client.inventoryContains(HERB) && client.inventoryContains(VIAL)) {
+                    state = States.MIX_VIAL
+                    return
+                }
+                if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(VIAL) && !client.inventoryContains(HERB)) {
+                    state = States.PICK_HERB
+                    return
+                }
                 if(state == States.CONFIRM) {
                     if(client.getWidget(14352385) != null) {
                         process = true
@@ -256,7 +298,7 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                     return
                 }
-                if(client.getInventoryItem(ItemID.SUPPLY_CRATE) != null) {
+                if(client.inventoryContains(ItemID.SUPPLY_CRATE)) {
                     state = States.PREPARE
                     return
                 }
@@ -267,15 +309,19 @@ class OneClickWintertodtPlugin : Plugin() {
                 if(state == States.LIGHT_BRAZIER && unlit != null) {
                     return
                 }
-                if(client.getInventoryItem(ItemID.HAMMER) == null) {
+                if(!client.inventoryContains(ItemID.REJUVENATION_POTION_UNF) && !client.inventoryContains(POTIONS)) {
+                    state = States.NEED_VIAL
+                    return
+                }
+                if(!client.inventoryContains(ItemID.HAMMER)) {
                     state = States.NEED_HAMMER
                     return
                 }
-                if(client.getInventoryItem(ItemID.KNIFE) == null) {
+                if(!client.inventoryContains(ItemID.KNIFE)) {
                     state = States.NEED_KNIFE
                     return
                 }
-                if(client.getInventoryItem(ItemID.TINDERBOX) == null) {
+                if(!client.inventoryContains(ItemID.TINDERBOX)) {
                     state = States.NEED_TINDERBOX
                     return
                 }
@@ -283,11 +329,11 @@ class OneClickWintertodtPlugin : Plugin() {
                     state = States.LIGHT_BRAZIER
                     return
                 }
-                if(client.getWidget(INTERFACE_TEXT)?.text!!.contains("0:00", true)) {
+                if(client.getWidget(INTERFACE_TEXT)?.text?.contains("0:00", true) == true) {
                     gameStarted = true
                     return
                 }
-                if(client.getWidget(INTERFACE_TEXT)?.text!!.contains("returns in", true)) {
+                if(client.getWidget(INTERFACE_TEXT)?.text?.contains("returns in", true) == true) {
                     state = States.GO_TO_BRAZIER
                     gameStarted = false
                     return
@@ -296,23 +342,19 @@ class OneClickWintertodtPlugin : Plugin() {
                     state = States.LIGHT_BRAZIER
                     return
                 }
-                if(client.getInventoryItem(KINDLING) != null && client.getInventoryItem(LOG) == null) {
+                if(client.inventoryContains(KINDLING) && !client.inventoryContains(LOG)) {
                     state = States.FIREMAKING
                     return
                 }
-                if((state == States.WOODCUTTING || state == States.FLETCHING) && client.localPlayer!!.animation == -1) {
-                    process = true
-                    return
-                }
-                if(client.getInventoryItem(LOG) != null && (client.getInventorySpace() <= 0 || (client.inventoryQuantity(LOG) + client.inventoryQuantity(KINDLING)) >= 10)) {
+                if(client.inventoryContains(LOG) && (client.getInventorySpace() <= 0 || (client.inventoryQuantity(LOG) + client.inventoryQuantity(KINDLING)) >= 10)) {
                     state = States.FLETCHING
                     return
                 }
-                if(client.getInventoryItem(LOG) == null && client.getInventoryItem(KINDLING) == null) {
+                if(!client.inventoryContains(LOG) && !client.inventoryContains(KINDLING)) {
                     state = States.WOODCUTTING
                     return
                 }
-                state = States.WOODCUTTING
+                state = States.IDLE
                 return
             }
         }

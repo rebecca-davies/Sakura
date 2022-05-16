@@ -18,6 +18,10 @@ enum class States {
     BANK,
     WITHDRAW_FOOD,
     RETURN_INSIDE,
-    REPAIR
+    REPAIR,
+    NEED_VIAL,
+    PICK_HERB,
+    MIX_VIAL,
+    HEAL_PYROMANCER,
 
 }

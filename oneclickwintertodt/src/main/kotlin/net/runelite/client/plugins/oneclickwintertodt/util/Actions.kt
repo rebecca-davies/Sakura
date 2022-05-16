@@ -41,14 +41,28 @@ class Actions {
         }
     }
 
-    fun MenuOptionClicked.use(gameObject: GameObject) {
+    fun MenuOptionClicked.use(gameObject: TileObject) {
+        val location = if(gameObject is GameObject) Location(gameObject.sceneMinLocation.x, gameObject.sceneMinLocation.y) else Location(gameObject.localLocation.sceneX, gameObject.localLocation.sceneY)
         try {
             this.menuOption = ""
             this.menuTarget = ""
             this.id = gameObject.id
             this.menuAction = MenuAction.GAME_OBJECT_FIRST_OPTION
-            this.param0 = gameObject.sceneMinLocation.x
-            this.param1 = gameObject.sceneMinLocation.y
+            this.param0 = location.x
+            this.param1 = location.y
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
+    fun MenuOptionClicked.heal() {
+        try {
+            this.menuOption = "Help"
+            this.menuTarget = "<col=ffff00>Incapacitated Pyromancer"
+            this.id = 475
+            this.menuAction = MenuAction.NPC_FIRST_OPTION
+            this.param0 = 0
+            this.param1 = 0
         } catch (e: Exception) {
             this.consume()
         }
@@ -72,14 +86,14 @@ class Actions {
         }
     }
 
-    fun MenuOptionClicked.useOn(item: Widget) {
+    fun MenuOptionClicked.useOn(item: Widget, used: Widget) {
         try {
-            client.getInventoryItem(ItemID.KNIFE)?.let {
-                client.selectedSpellWidget = it.id
-                client.selectedSpellChildIndex = it.index
-                client.selectedSpellItemId = it.itemId
-                this.menuOption = "Use"
-                this.menuTarget = "<col=ff9040>Knife</col><col=ffffff> -> <col=ff9040>Bruma root</col>"
+            client.getInventoryItem(used.itemId)?.let {
+                client.selectedSpellWidget = used.id
+                client.selectedSpellChildIndex = used.index
+                client.selectedSpellItemId = used.itemId
+                this.menuOption = ""
+                this.menuTarget = ""
                 this.id = 0
                 this.menuAction = MenuAction.WIDGET_TARGET_ON_WIDGET
                 this.param0 = item.index
