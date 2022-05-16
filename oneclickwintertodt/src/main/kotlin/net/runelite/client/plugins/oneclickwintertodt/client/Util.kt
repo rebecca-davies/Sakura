@@ -63,6 +63,15 @@ fun Client.inventoryQuantity(id: Int) : Int {
     return 0
 }
 
+fun Client.bankInventoryQuantity(id: Int) : Int {
+    val inventoryWidget: Widget? = this.getWidget(WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER)
+    if (inventoryWidget != null) {
+        val items = inventoryWidget.dynamicChildren ?: return 0
+        return items.filter { it.itemId == id }.size
+    }
+    return 0
+}
+
 fun getWidgetItem(id: Int, inventoryWidget: Widget?): Widget? {
     if (inventoryWidget != null) {
         val items = inventoryWidget.dynamicChildren ?: return null

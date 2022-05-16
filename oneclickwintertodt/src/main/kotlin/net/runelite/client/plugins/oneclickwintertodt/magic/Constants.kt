@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.oneclickwintertodt.magic
 
 import net.runelite.api.ItemID
+import net.runelite.api.coords.LocalPoint
 import net.runelite.api.coords.WorldArea
 import net.runelite.api.coords.WorldPoint
 
@@ -29,4 +30,5 @@ val SE_PYROMANCER_POS = WorldPoint(1641, 3996, 0)
 val SE_ROOT_POS = WorldPoint(1639, 3988, 0)
 val HERB_POS = WorldPoint(1649, 4007, 0)
 val LOBBY_AREA = WorldArea(1626, 3978, 8, 8, 0)
+val SE_AREA = WorldPoint(1640, 3993, 0)
 val POTIONS = listOf(ItemID.REJUVENATION_POTION_1, ItemID.REJUVENATION_POTION_2, ItemID.REJUVENATION_POTION_3, ItemID.REJUVENATION_POTION_4)

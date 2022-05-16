@@ -1,10 +1,14 @@
 package net.runelite.client.plugins.oneclickwintertodt.util
 
 import net.runelite.api.*
+import net.runelite.api.coords.LocalPoint
+import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.widgets.Widget
 import net.runelite.client.OneClickWintertodtPlugin
 import net.runelite.client.plugins.oneclicklavas.getInventoryItem
+import net.runelite.client.plugins.oneclickwintertodt.magic.SE_AREA
+import net.runelite.rs.api.RSClient
 import javax.inject.Inject
 
 class Actions {
@@ -36,6 +40,27 @@ class Actions {
             this.menuAction = MenuAction.CC_OP
             this.param0 = 11
             this.param1 = 786434
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
+    fun MenuOptionClicked.walk() {
+        try {
+            this.menuOption = "Walk here"
+            this.menuTarget = ""
+            this.id = 0
+            this.menuAction = MenuAction.WALK
+            this.param0 = SE_AREA.x
+            this.param1 = SE_AREA.y
+            this.consume()
+            val rsclient = client as RSClient
+            val local = LocalPoint.fromWorld(client, WorldPoint(this.param0, this.param1, client.plane))!!
+            rsclient.selectedSceneTileX = local.sceneX
+            rsclient.selectedSceneTileY = local.sceneY
+            rsclient.setViewportWalking(true)
+            rsclient.isCheckClick = false
+            client.addChatMessage(ChatMessageType.GAMEMESSAGE, "Sakura", "x: ${local.x} y: ${local.y} sceneX: ${local.sceneX} sceneY: ${local.sceneY} param0: ${this.param0} param1: ${this.param1}", "")
         } catch (e: Exception) {
             this.consume()
         }

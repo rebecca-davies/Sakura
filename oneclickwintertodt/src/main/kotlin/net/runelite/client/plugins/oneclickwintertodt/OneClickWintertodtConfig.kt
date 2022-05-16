@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.zeahcrafter
+package net.runelite.client.plugins.oneclickwintertodt
 
 import net.runelite.api.ItemID
 import net.runelite.client.config.*
@@ -13,8 +13,6 @@ interface OneClickWintertodtConfig : Config {
             description = "Configure your plugins settings to suit your needs",
             position = 1)
         val food: String = "food"
-
-
     }
 
     @ConfigItem(
@@ -40,5 +38,3 @@ interface OneClickWintertodtConfig : Config {
         }
     }
 }
-
-

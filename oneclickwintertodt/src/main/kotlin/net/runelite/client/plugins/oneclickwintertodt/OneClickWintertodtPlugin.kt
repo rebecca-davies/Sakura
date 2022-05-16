@@ -2,6 +2,8 @@ package net.runelite.client
 
 import com.google.inject.Provides
 import net.runelite.api.*
+import net.runelite.api.coords.LocalPoint
+import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.ChatMessage
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
@@ -15,7 +17,7 @@ import net.runelite.client.plugins.oneclickwintertodt.States
 import net.runelite.client.plugins.oneclickwintertodt.magic.*
 import net.runelite.client.plugins.oneclickwintertodt.util.Actions
 import net.runelite.client.plugins.oneclickwintertodt.util.Log
-import net.runelite.client.plugins.zeahcrafter.OneClickWintertodtConfig
+import net.runelite.client.plugins.oneclickwintertodt.OneClickWintertodtConfig
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
@@ -93,8 +95,8 @@ class OneClickWintertodtPlugin : Plugin() {
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         with(actions) {
-
             checkStates()
+            client.addChatMessage(ChatMessageType.GAMEMESSAGE, "Sakura", "state=$state process=$process", "")
             client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                 items = it.items
             }
@@ -113,13 +115,17 @@ class OneClickWintertodtPlugin : Plugin() {
             val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == SE_POS}
             val roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == SE_ROOT_POS}
             val herbPatch = client.findGameObject(HERB)?.takeIf { it.worldLocation == HERB_POS}
-            client.addChatMessage(ChatMessageType.GAMEMESSAGE, "Sakura", "state=$state process=$process bank=${bank?.name}", "")
+
             when (state) {
                 States.HEAL_PYROMANCER -> {
                     if(client.inventoryContains(POTIONS)) {
                         event.heal()
                         return
                     }
+                    return
+                }
+                States.WALK_TO_SE -> {
+                    event.walk()
                     return
                 }
                 States.PICK_HERB -> {
@@ -237,24 +243,13 @@ class OneClickWintertodtPlugin : Plugin() {
         val lit = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == SE_POS }
         val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == SE_POS }
         val bank = client.findGameObject(BANK)
+        val roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == SE_ROOT_POS}
         food = config.food()
-
-        if(state == States.PREPARE) {
-            return
-        }
-
-        if(client.getBoostedSkillLevel(Skill.HITPOINTS) <= (client.getRealSkillLevel(Skill.HITPOINTS) / 2.5)) {
-            state = States.EAT
-            return
-        }
-        if(lit != null && !gameStarted) {
-            gameStarted = true
-        }
 
         when(client.localPlayer!!.worldLocation.regionID) {
             BANK_REGION -> {
                 if(client.banking()) {
-                    if(client.getBankInventoryItem(food.id) == null) {
+                    if(client.getBankInventoryItem(food.id) == null || client.bankInventoryQuantity(food.id) <= 5) {
                         state = States.WITHDRAW_FOOD
                         return
                     }
@@ -276,9 +271,6 @@ class OneClickWintertodtPlugin : Plugin() {
                 return
             }
             LOBBY_REGION -> {
-                if(state == States.GO_TO_BRAZIER && client.localPlayer.worldLocation.distanceTo(unlit?.worldLocation) > 3) {
-                    process = true
-                }
                 if(state == States.CONFIRM) {
                     if(client.getWidget(14352385) != null) {
                         process = true
@@ -286,6 +278,28 @@ class OneClickWintertodtPlugin : Plugin() {
                         return
                     }
                     return
+                }
+                if(state == States.PREPARE) {
+                    return
+                }
+                if(client.localPlayer.worldLocation.isInArea(LOBBY_AREA)) {
+                    process = true
+                }
+                if(client.getBoostedSkillLevel(Skill.HITPOINTS) <= (client.getRealSkillLevel(Skill.HITPOINTS) / 2.5)) {
+                    if(!client.inventoryContains(food.id)) {
+                        state = States.PREPARE
+                        return
+                    }
+                    state = States.EAT
+                    return
+                }
+                if(roots == null || state == States.GO_TO_BRAZIER && unlit == null) {
+                    state = States.WALK_TO_SE
+                    process = true
+                    return
+                }
+                if(lit != null && !gameStarted) {
+                    gameStarted = true
                 }
                 if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(POTIONS)) {
                     state = States.HEAL_PYROMANCER
