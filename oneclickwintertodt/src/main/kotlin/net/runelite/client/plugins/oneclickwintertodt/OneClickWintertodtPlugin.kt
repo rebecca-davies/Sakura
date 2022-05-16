@@ -149,7 +149,7 @@ class OneClickWintertodtPlugin : Plugin() {
                 }
                 States.WITHDRAW_FOOD -> {
                     client.getBankItem(food.id)?.let {
-                        event.clickItem(it, 4, WidgetInfo.BANK_ITEM_CONTAINER.id)
+                        event.clickItem(it, 3, WidgetInfo.BANK_ITEM_CONTAINER.id)
                         return
                     }
                 }
@@ -298,9 +298,6 @@ class OneClickWintertodtPlugin : Plugin() {
                     process = true
                     return
                 }
-                if(lit != null && !gameStarted) {
-                    gameStarted = true
-                }
                 if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(POTIONS)) {
                     state = States.HEAL_PYROMANCER
                     return
@@ -312,6 +309,13 @@ class OneClickWintertodtPlugin : Plugin() {
                 if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(VIAL) && !client.inventoryContains(HERB)) {
                     state = States.PICK_HERB
                     return
+                }
+                if(!gameStarted && client.inventoryQuantity(food.id) <= 5) {
+                    state = States.PREPARE
+                    return
+                }
+                if(lit != null && !gameStarted) {
+                    gameStarted = true
                 }
                 if(client.inventoryContains(ItemID.SUPPLY_CRATE)) {
                     state = States.PREPARE
@@ -365,7 +369,7 @@ class OneClickWintertodtPlugin : Plugin() {
                     state = States.FLETCHING
                     return
                 }
-                if(!client.inventoryContains(LOG) && !client.inventoryContains(KINDLING)) {
+                if(!client.inventoryContains(KINDLING)) {
                     state = States.WOODCUTTING
                     return
                 }
