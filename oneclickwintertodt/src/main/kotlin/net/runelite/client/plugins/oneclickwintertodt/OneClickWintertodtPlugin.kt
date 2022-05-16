@@ -135,11 +135,10 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                 }
                 States.MIX_VIAL -> {
-                    client.getInventoryItem(HERB)?.let {
-                        event.useOn(it, client.getInventoryItem(ItemID.VIAL)!!)
+                    client.getInventoryItem(BRUMA_HERB)?.let {
+                        event.useOn(it, client.getInventoryItem(VIAL)!!)
                         return
                     }
-                    return
                 }
                 States.REPAIR -> {
                     broken?.let {
@@ -249,7 +248,7 @@ class OneClickWintertodtPlugin : Plugin() {
         when(client.localPlayer!!.worldLocation.regionID) {
             BANK_REGION -> {
                 if(client.banking()) {
-                    if(client.getBankInventoryItem(food.id) == null || client.bankInventoryQuantity(food.id) <= 5) {
+                    if(client.getBankInventoryItem(food.id) == null || client.bankInventoryQuantity(food.id) <= 4) {
                         state = States.WITHDRAW_FOOD
                         return
                     }
@@ -302,15 +301,15 @@ class OneClickWintertodtPlugin : Plugin() {
                     state = States.HEAL_PYROMANCER
                     return
                 }
-                if(client.inventoryContains(HERB) && client.inventoryContains(VIAL)) {
+                if(client.inventoryContains(BRUMA_HERB) && client.inventoryContains(VIAL)) {
                     state = States.MIX_VIAL
                     return
                 }
-                if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(VIAL) && !client.inventoryContains(HERB)) {
+                if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(VIAL) && !client.inventoryContains(BRUMA_HERB)) {
                     state = States.PICK_HERB
                     return
                 }
-                if(!gameStarted && client.inventoryQuantity(food.id) <= 5) {
+                if(!gameStarted && client.inventoryQuantity(food.id) <= 4) {
                     state = States.PREPARE
                     return
                 }
