@@ -95,6 +95,19 @@ class OneClickWintertodtPlugin : Plugin() {
     }
 
     @Subscribe
+    private fun onConfigChanged(event: ConfigChanged) {
+        food = config.food()
+    }
+
+    @Subscribe
+    private fun onHitsplatApplied(event: HitsplatApplied) {
+        if(event.actor == client.localPlayer) {
+            performAction = true
+            return
+        }
+    }
+
+    @Subscribe
     private fun onGameTick(event: GameTick) {
         bankChest = client.findGameObject(BANK_CHEST)
         door = client.findGameObject(DOOR)
@@ -110,24 +123,12 @@ class OneClickWintertodtPlugin : Plugin() {
     }
 
     @Subscribe
-    private fun onConfigChanged(event: ConfigChanged) {
-        food = config.food()
-    }
-
-    @Subscribe
-    private fun onHitsplatApplied(event: HitsplatApplied) {
-        if(event.actor == client.localPlayer) {
-            performAction = true
-            return
-        }
-    }
-
-    @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         with(inventories) {
             with(events) {
-                performChecks()
                 client.getItemContainer(InventoryID.INVENTORY.id)?.let { itemContainer = it.items }
+                handleLogic()
+                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "$state $performAction", "")
                 if (!performAction) {
                     event.consume()
                 }
@@ -150,7 +151,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.MIX_VIAL -> {
-                        inventory.getItem(ItemID.BRUMA_ROOT)?.let {
+                        inventory.getItem(ItemID.BRUMA_HERB)?.let {
                             event.useOn(it, inventory.getItem(ItemID.REJUVENATION_POTION_UNF))
                             return
                         }
@@ -250,7 +251,7 @@ class OneClickWintertodtPlugin : Plugin() {
         }
     }
 
-    private fun performChecks() {
+    private fun handleLogic() {
         with(inventories) {
             when (client.localPlayer!!.worldLocation.regionID) {
                 BANK_REGION -> {
@@ -280,58 +281,22 @@ class OneClickWintertodtPlugin : Plugin() {
                     if (state == States.CONFIRM_EXIT) {
                         if (client.getWidget(14352385) != null) {
                             performAction = true
-                        } else {
-                            return
                         }
                         return
                     }
                     if (state == States.LEAVE_DOOR) {
                         return
                     }
-                    if (client.localPlayer.worldLocation.isInArea(LOBBY_AREA)) {
+                    if (client.localPlayer.worldLocation.isInArea(LOBBY_AREA) && !client.localPlayer.isMoving) {
                         performAction = true
                     }
+
                     if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= (client.getRealSkillLevel(Skill.HITPOINTS) / 2.5)) {
                         if (!inventory.contains(food.id)) {
                             state = States.LEAVE_DOOR
                             return
                         }
                         state = States.EAT
-                        return
-                    }
-                    if (roots == null || state == States.GO_TO_BRAZIER && unlitBrazier == null) {
-                        state = States.WALK_TO_SE
-                        performAction = true
-                        return
-                    }
-                    if (client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(HEALING_POTIONS)) {
-                        state = States.HEAL_PYROMANCER
-                        return
-                    }
-                    if (inventory.contains(ItemID.BRUMA_HERB) && inventory.contains(ItemID.REJUVENATION_POTION_UNF)) {
-                        state = States.MIX_VIAL
-                        return
-                    }
-                    if (client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(ItemID.REJUVENATION_POTION_UNF) && !inventory.contains(ItemID.BRUMA_HERB)) {
-                        state = States.PICK_HERB
-                        return
-                    }
-                    if (!gameStarted && inventory.quantity(food.id) <= 4) {
-                        state = States.LEAVE_DOOR
-                        return
-                    }
-                    if (litBrazier != null && !gameStarted) {
-                        gameStarted = true
-                    }
-                    if (inventory.contains(ItemID.SUPPLY_CRATE)) {
-                        state = States.LEAVE_DOOR
-                        return
-                    }
-                    if (state == States.FIREMAKING && brokenBrazier != null) {
-                        state = States.REPAIR
-                        return
-                    }
-                    if (state == States.LIGHT_BRAZIER && unlitBrazier != null) {
                         return
                     }
                     if (!inventory.contains(ItemID.REJUVENATION_POTION_UNF) && !inventory.contains(HEALING_POTIONS)) {
@@ -350,25 +315,48 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.NEED_TINDERBOX
                         return
                     }
-                    if (gameStarted && state == States.GO_TO_BRAZIER && client.getWidget(INTERFACE_TEXT)!!.text.isEmpty()) {
+                    if ((!gameStarted && inventory.quantity(food.id) <= 4) || inventory.contains(ItemID.SUPPLY_CRATE)) {
+                        state = States.LEAVE_DOOR
+                        return
+                    }
+                    if (roots == null) {
+                        state = States.WALK_TO_SE
+                        performAction = true
+                        return
+                    }
+                    if (gameStarted && state == States.GO_TO_BRAZIER && client.getWidget(INTERFACE_TEXT)?.text?.isEmpty()!!) {
                         state = States.LIGHT_BRAZIER
                         return
                     }
                     if (client.getWidget(INTERFACE_TEXT)?.text?.contains("0:00", true) == true) {
                         gameStarted = true
-                        return
                     }
                     if (client.getWidget(INTERFACE_TEXT)?.text?.contains("returns in", true) == true) {
                         state = States.GO_TO_BRAZIER
                         gameStarted = false
                         return
                     }
-                    if (unlitBrazier != null && (state == States.FIREMAKING || state == States.GO_TO_BRAZIER)) {
-                        state = States.LIGHT_BRAZIER
+                    if (litBrazier != null && !gameStarted) {
+                        gameStarted = true
+                    }
+                    if (client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(HEALING_POTIONS)) {
+                        state = States.HEAL_PYROMANCER
                         return
                     }
-                    if (inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT)) {
-                        state = States.FIREMAKING
+                    if (inventory.contains(ItemID.BRUMA_HERB) && inventory.contains(ItemID.REJUVENATION_POTION_UNF)) {
+                        state = States.MIX_VIAL
+                        return
+                    }
+                    if (client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(ItemID.REJUVENATION_POTION_UNF) && !inventory.contains(ItemID.BRUMA_HERB)) {
+                        state = States.PICK_HERB
+                        return
+                    }
+                    if (state == States.FIREMAKING && brokenBrazier != null) {
+                        state = States.REPAIR
+                        return
+                    }
+                    if (state == States.FIREMAKING && unlitBrazier != null) {
+                        state = States.LIGHT_BRAZIER
                         return
                     }
                     if (inventory.contains(ItemID.BRUMA_ROOT) && (inventory.freeSpace() <= 0 || (inventory.quantity(ItemID.BRUMA_ROOT) + inventory.quantity(ItemID.BRUMA_KINDLING)) >= 10)) {
@@ -376,10 +364,23 @@ class OneClickWintertodtPlugin : Plugin() {
                         return
                     }
                     if (!inventory.contains(ItemID.BRUMA_KINDLING)) {
+                        if(client.localPlayer!!.animation == -1) {
+                            performAction = true
+                        }
                         state = States.WOODCUTTING
                         return
                     }
+                    if (unlitBrazier != null && state != States.WOODCUTTING) {
+                        state = States.LIGHT_BRAZIER
+                        return
+                    }
+                    if (inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) {
+                        state = States.FIREMAKING
+                        return
+                    }
+
                     state = States.IDLE
+                    performAction = true
                     return
                 }
                 else -> {}
