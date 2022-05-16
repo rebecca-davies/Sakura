@@ -93,6 +93,7 @@ class OneClickWintertodtPlugin : Plugin() {
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         with(actions) {
+
             checkStates()
             client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                 items = it.items
@@ -112,7 +113,7 @@ class OneClickWintertodtPlugin : Plugin() {
             val broken = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == SE_POS}
             val roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == SE_ROOT_POS}
             val herbPatch = client.findGameObject(HERB)?.takeIf { it.worldLocation == HERB_POS}
-
+            client.addChatMessage(ChatMessageType.GAMEMESSAGE, "Sakura", "state=$state process=$process bank=${bank?.name}", "")
             when (state) {
                 States.HEAL_PYROMANCER -> {
                     if(client.inventoryContains(POTIONS)) {
@@ -278,6 +279,14 @@ class OneClickWintertodtPlugin : Plugin() {
                 if(state == States.GO_TO_BRAZIER && client.localPlayer.worldLocation.distanceTo(unlit?.worldLocation) > 3) {
                     process = true
                 }
+                if(state == States.CONFIRM) {
+                    if(client.getWidget(14352385) != null) {
+                        process = true
+                    } else {
+                        return
+                    }
+                    return
+                }
                 if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(POTIONS)) {
                     state = States.HEAL_PYROMANCER
                     return
@@ -288,14 +297,6 @@ class OneClickWintertodtPlugin : Plugin() {
                 }
                 if(client.findNpc(DOWNED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && client.inventoryContains(VIAL) && !client.inventoryContains(HERB)) {
                     state = States.PICK_HERB
-                    return
-                }
-                if(state == States.CONFIRM) {
-                    if(client.getWidget(14352385) != null) {
-                        process = true
-                    } else {
-                        return
-                    }
                     return
                 }
                 if(client.inventoryContains(ItemID.SUPPLY_CRATE)) {

@@ -5,7 +5,6 @@ enum class States {
     DEPOSIT_ITEMS,
     WOODCUTTING,
     FLETCHING,
-    BURNING,
     EAT,
     NEED_HAMMER,
     NEED_KNIFE,
