@@ -26,6 +26,7 @@
 rootProject.name = "Externals"
 include(":oneclicklavas")
 include(":oneclickwintertodt")
+include(":oneclickshops")
 for (project in rootProject.children) {
     project.apply {
         projectDir = file(name)
