@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclickwintertodt.client
+package net.runelite.client.plugins.oneclickshops.client
 
 import net.runelite.api.Client
 import net.runelite.api.GameObject
@@ -8,6 +8,7 @@ import net.runelite.api.queries.GameObjectQuery
 import net.runelite.api.queries.NPCQuery
 import net.runelite.api.widgets.Widget
 import net.runelite.api.widgets.WidgetInfo
+import net.runelite.client.plugins.oneclickwintertodt.magic.shop
 
 
 fun Client.findGameObject(vararg ids: String?): GameObject? {
@@ -22,12 +23,22 @@ fun Client.findGameObject(id: Int): GameObject? {
     return query.result(this).nearestTo(this.localPlayer)
 }
 
-fun Client.findNpc(id: Int): NPC? {
+fun Client.findNpc(ids: Collection<Int>): NPC? {
     val query = NPCQuery()
-    query.idEquals(id)
+    query.idEquals(ids)
+    return query.result(this).nearestTo(this.localPlayer)
+}
+
+fun Client.findGameObject(ids: Collection<Int>): GameObject? {
+    val query = GameObjectQuery()
+    query.idEquals(ids)
     return query.result(this).nearestTo(this.localPlayer)
 }
 
 fun Client.banking(): Boolean {
     return this.getItemContainer(InventoryID.BANK) != null
+}
+
+fun Client.shopping(): Boolean {
+    return this.getWidget(shop)!= null
 }

@@ -2,24 +2,16 @@ package net.runelite.client
 
 import com.google.inject.Provides
 import net.runelite.api.*
-import net.runelite.api.events.GameTick
-import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
-import net.runelite.api.widgets.WidgetInfo.BANK_ITEM_CONTAINER as bank
-import net.runelite.api.widgets.WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER as bankInventory
-import net.runelite.api.widgets.WidgetInfo.INVENTORY as inventory
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.ConfigChanged
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
-import net.runelite.client.plugins.oneclickwintertodt.States
-import net.runelite.client.plugins.oneclickwintertodt.magic.*
-import net.runelite.client.plugins.oneclickwintertodt.api.entry.Entries
-import net.runelite.client.plugins.oneclickwintertodt.util.Log
-import net.runelite.client.plugins.oneclickwintertodt.OneClickShopsConfig
-import net.runelite.client.plugins.oneclickwintertodt.api.inventory.Inventory
-import net.runelite.client.plugins.oneclickwintertodt.client.*
+import net.runelite.client.plugins.oneclickshops.States
+import net.runelite.client.plugins.oneclickshops.util.Log
+import net.runelite.client.plugins.oneclickshops.OneClickShopsConfig
+import net.runelite.client.plugins.oneclickshops.data.Shops
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
@@ -38,12 +30,6 @@ class OneClickShopsPlugin : Plugin() {
     @Inject
     lateinit var client: Client
 
-    @Inject
-    lateinit var events: Entries
-
-    @Inject
-    lateinit var inventories: Inventory
-
     companion object : Log()
 
     @Provides
@@ -52,7 +38,9 @@ class OneClickShopsPlugin : Plugin() {
     }
 
     var performAction = true
-    private lateinit var food: OneClickShopsConfig.Food
+    private lateinit var shop: Shops
+    lateinit var items: List<Int>
+    var current = shop.clazz
 
     override fun startUp() {
         log.info("Starting One Click Shops")
@@ -65,12 +53,11 @@ class OneClickShopsPlugin : Plugin() {
 
     private fun reset() {
         performAction = true
+        shop = config.shop()
+        items = config.items().lines().map { it.toInt() }.toList()
     }
 
-    private var itemContainer: Array<Item> by Delegates.observable(arrayOf()) { property, previous, current ->
-    }
-
-    private var state by Delegates.observable(States.IDLE) { property, previous, current ->
+    var state by Delegates.observable(States.IDLE) { property, previous, current ->
         if (previous != current) {
             performAction = true
         }
@@ -78,23 +65,16 @@ class OneClickShopsPlugin : Plugin() {
 
     @Subscribe
     private fun onConfigChanged(event: ConfigChanged) {
+        shop = config.shop()
+        items = config.items().lines().map { it.toInt() }.toList()
     }
 
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
-        with(inventories) {
-            with(events) {
-                handleLogic()
-                if(!performAction) {
-                    event.consume()
-                }
-                performAction = false
-            }
+        if(!performAction) {
+            event.consume()
         }
+        performAction = false
     }
 
-    private fun handleLogic() {
-        with(inventories) {
-        }
-    }
 }

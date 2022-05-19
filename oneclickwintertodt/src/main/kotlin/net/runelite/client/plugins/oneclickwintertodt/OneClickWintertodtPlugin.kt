@@ -21,6 +21,7 @@ import net.runelite.client.plugins.oneclickwintertodt.OneClickWintertodtConfig
 import net.runelite.client.plugins.oneclickwintertodt.api.inventory.Inventory
 import net.runelite.client.plugins.oneclickwintertodt.client.*
 import org.pf4j.Extension
+import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -52,7 +53,8 @@ class OneClickWintertodtPlugin : Plugin() {
     }
 
     var performAction = true
-    private lateinit var food: OneClickWintertodtConfig.Food
+    private lateinit var food: List<Int>
+    private var health = 25
     private var gameStarted = true
     private var bankChest: GameObject? = null
     private var door: GameObject? = null
@@ -78,7 +80,8 @@ class OneClickWintertodtPlugin : Plugin() {
     private fun reset() {
         performAction = true
         gameStarted = false
-        food = config.food()
+        food = config.food().id.toList()
+        health = config.health()
         state = States.IDLE
     }
 
@@ -96,7 +99,8 @@ class OneClickWintertodtPlugin : Plugin() {
 
     @Subscribe
     private fun onConfigChanged(event: ConfigChanged) {
-        food = config.food()
+        food = config.food().id.toList()
+        health = config.health()
     }
 
     @Subscribe
@@ -163,24 +167,29 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.WITHDRAW_FOOD -> {
-                        bank.getItem(food.id)?.let {
+                        bank.getItem(food.last())?.let {
                             event.clickItem(it, 3, bank)
                             return
                         }
                     }
                     States.DEPOSIT_ITEMS -> {
                         bankInventory.getItem(ItemID.SUPPLY_CRATE)?.let {
-                            event.clickItem(it, 3, bankInventory)
+                            event.clickItem(it, 2, bankInventory)
                             return
                         }
                     }
                     States.EAT -> {
-                        val food = inventory.getItem(food.id)
-                        if (food != null) {
-                            state = States.IDLE
-                            event.clickItem(food, 2, inventory)
+                        food.forEach {
+                            try {
+                                inventory.getItem(it)?.let { eat ->
+                                    state = States.IDLE
+                                    event.clickItem(eat, 2, inventory)
+                                    return
+                                }
+                            } catch (e: Exception) {
+                                println(e.stackTrace)
+                            }
                         }
-                        return
                     }
                     States.RETURN_INSIDE -> {
                         door?.let {
@@ -256,7 +265,7 @@ class OneClickWintertodtPlugin : Plugin() {
             when (client.localPlayer!!.worldLocation.regionID) {
                 BANK_REGION -> {
                     if (client.banking()) {
-                        if (bankInventory.quantity(food.id) <= 4) {
+                        if (bankInventory.quantity(food) <= 4) {
                             state = States.WITHDRAW_FOOD
                             return
                         }
@@ -266,7 +275,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     bankChest?.let {
-                        if (inventory.quantity(food.id) <= 4 ||  inventory.contains(ItemID.SUPPLY_CRATE)) {
+                        if (inventory.quantity(food) <= 4 ||  inventory.contains(ItemID.SUPPLY_CRATE)) {
                             if (!client.localPlayer.isMoving) {
                                 performAction = true
                             }
@@ -291,8 +300,8 @@ class OneClickWintertodtPlugin : Plugin() {
                         performAction = true
                     }
 
-                    if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= (client.getRealSkillLevel(Skill.HITPOINTS) / 2.5)) {
-                        if (!inventory.contains(food.id)) {
+                    if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= health) {
+                        if (!inventory.contains(food)) {
                             state = States.LEAVE_DOOR
                             return
                         }
@@ -315,7 +324,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.NEED_TINDERBOX
                         return
                     }
-                    if ((!gameStarted && inventory.quantity(food.id) <= 4) || inventory.contains(ItemID.SUPPLY_CRATE)) {
+                    if ((!gameStarted && inventory.quantity(food) <= 4) || inventory.contains(ItemID.SUPPLY_CRATE)) {
                         state = States.LEAVE_DOOR
                         return
                     }

@@ -26,6 +26,10 @@ class Inventory {
         return client.getWidget(this)?.dynamicChildren?.filter { it.itemId == id }?.size!!
     }
 
+    fun WidgetInfo.quantity(id: List<Int>): Int {
+        return client.getWidget(this)?.dynamicChildren?.filter { id.contains(it.itemId) }?.size!!
+    }
+
     fun WidgetInfo.freeSpace(): Int {
         return 28 - client.getWidget(this)?.dynamicChildren?.filter { it.itemId != 6512 }?.size!!
     }

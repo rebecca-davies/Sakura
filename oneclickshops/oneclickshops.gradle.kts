@@ -6,8 +6,8 @@ plugins {
 }
 
 version = "1.0.1"
-project.extra["PluginName"] = "One Click Wintertodt" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "A one click wintertodt script." // This is the description that is used in the external plugin manager panel
+project.extra["PluginName"] = "One Click Shops" // This is the name that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "A one click shops script." // This is the description that is used in the external plugin manager panel
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")

@@ -70,9 +70,6 @@ class OneClickLavasPlugin : Plugin() {
 
     private var items: Array<Item> by Delegates.observable(arrayOf()) { _, prev, curr ->
         if(!prev.contentEquals(curr)) {
-           /* if(state == States.FILL_POUCH) {
-                attributes.computeIfPresent("fill") { _, v -> v + 1 }
-            }*/
         }
     }
 

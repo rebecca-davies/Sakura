@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclickwintertodt.api.entry
+package net.runelite.client.plugins.oneclickshops.api.entry
 
 import net.runelite.api.*
 import net.runelite.api.coords.LocalPoint
@@ -22,6 +22,19 @@ class Entries {
             this.menuAction = if (action < 6) MenuAction.CC_OP else MenuAction.CC_OP_LOW_PRIORITY
             this.param0 = item.index
             this.param1 = container.id
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
+    fun MenuOptionClicked.clickItem(item: Widget, action: Int, container: Int) {
+        try {
+            this.menuOption = ""
+            this.menuTarget = ""
+            this.id = action
+            this.menuAction = if (action < 6) MenuAction.CC_OP else MenuAction.CC_OP_LOW_PRIORITY
+            this.param0 = item.index
+            this.param1 = container
         } catch (e: Exception) {
             this.consume()
         }
@@ -91,12 +104,12 @@ class Entries {
         }
     }
 
-    fun MenuOptionClicked.healPyromancer() {
+    fun MenuOptionClicked.trade(npc: NPC, action: MenuAction) {
         try {
-            this.menuOption = "Help"
-            this.menuTarget = "<col=ffff00>Incapacitated Pyromancer"
-            this.id = 475
-            this.menuAction = MenuAction.NPC_FIRST_OPTION
+            this.menuOption = ""
+            this.menuTarget = ""
+            this.id = npc.index
+            this.menuAction = action
             this.param0 = 0
             this.param1 = 0
         } catch (e: Exception) {
