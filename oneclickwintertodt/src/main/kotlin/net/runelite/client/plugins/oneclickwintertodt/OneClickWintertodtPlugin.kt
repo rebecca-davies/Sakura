@@ -5,6 +5,8 @@ import net.runelite.api.*
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
+import net.runelite.api.widgets.WidgetInfo
+import net.runelite.api.widgets.WidgetInfo.LEVEL_UP_CONTINUE
 import net.runelite.api.widgets.WidgetInfo.BANK_ITEM_CONTAINER as bank
 import net.runelite.api.widgets.WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER as bankInventory
 import net.runelite.api.widgets.WidgetInfo.INVENTORY as inventory
@@ -160,12 +162,7 @@ class OneClickWintertodtPlugin : Plugin() {
                             return
                         }
                     }
-                    States.REPAIR -> {
-                        brokenBrazier?.let {
-                            event.use(it)
-                            return
-                        }
-                    }
+
                     States.WITHDRAW_FOOD -> {
                         bank.getItem(food.last())?.let {
                             event.clickItem(it, 3, bank)
@@ -255,6 +252,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.IDLE -> {}
+                    else -> {}
                 }
             }
         }
@@ -262,6 +260,9 @@ class OneClickWintertodtPlugin : Plugin() {
 
     private fun handleLogic() {
         with(inventories) {
+            if(client.getWidget(LEVEL_UP_CONTINUE) != null) {
+                performAction = true
+            }
             when (client.localPlayer!!.worldLocation.regionID) {
                 BANK_REGION -> {
                     if (client.banking()) {
@@ -328,7 +329,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.LEAVE_DOOR
                         return
                     }
-                    if (roots == null) {
+                    if (roots == null || unlitBrazier == null && litBrazier == null && brokenBrazier == null) {
                         state = States.WALK_TO_SE
                         performAction = true
                         return
@@ -360,8 +361,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.PICK_HERB
                         return
                     }
-                    if (state == States.FIREMAKING && brokenBrazier != null) {
-                        state = States.REPAIR
+                    if (state == States.LIGHT_BRAZIER && unlitBrazier != null) {
                         return
                     }
                     if (state == States.FIREMAKING && unlitBrazier != null) {
@@ -373,21 +373,24 @@ class OneClickWintertodtPlugin : Plugin() {
                         return
                     }
                     if (!inventory.contains(ItemID.BRUMA_KINDLING)) {
-                        if(client.localPlayer!!.animation == -1) {
+                        if (client.localPlayer!!.animation == -1) {
                             performAction = true
                         }
                         state = States.WOODCUTTING
-                        return
-                    }
-                    if (unlitBrazier != null && state != States.WOODCUTTING) {
-                        state = States.LIGHT_BRAZIER
                         return
                     }
                     if (inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) {
                         state = States.FIREMAKING
                         return
                     }
-
+                    if (brokenBrazier != null) {
+                        state = States.REPAIR
+                        return
+                    }
+                    if (unlitBrazier != null) {
+                        state = States.LIGHT_BRAZIER
+                        return
+                    }
                     state = States.IDLE
                     performAction = true
                     return

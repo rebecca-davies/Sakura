@@ -7,7 +7,7 @@ import net.runelite.client.config.ConfigTitle
 import net.runelite.client.plugins.oneclickshops.data.Shops
 
 
-@ConfigGroup("OneClickWintertodt")
+@ConfigGroup("OneClickShops")
 interface OneClickShopsConfig : Config {
     companion object {
         @JvmField

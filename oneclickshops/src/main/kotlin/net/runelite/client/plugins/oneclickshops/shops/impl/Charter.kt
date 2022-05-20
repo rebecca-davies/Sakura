@@ -8,6 +8,7 @@ import net.runelite.client.plugins.oneclickshops.api.entry.Entries
 import net.runelite.client.plugins.oneclickshops.api.inventory.Inventory
 import net.runelite.client.plugins.oneclickshops.client.findNpc
 import net.runelite.client.plugins.oneclickshops.client.shopping
+import net.runelite.client.plugins.oneclickshops.shops.Shop
 import net.runelite.client.plugins.oneclickwintertodt.magic.shop
 import javax.inject.Inject
 

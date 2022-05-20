@@ -40,7 +40,6 @@ class OneClickShopsPlugin : Plugin() {
     var performAction = true
     private lateinit var shop: Shops
     lateinit var items: List<Int>
-    var current = shop.clazz
 
     override fun startUp() {
         log.info("Starting One Click Shops")

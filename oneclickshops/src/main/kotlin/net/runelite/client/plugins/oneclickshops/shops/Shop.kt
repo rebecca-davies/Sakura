@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclickshops.shops.impl
+package net.runelite.client.plugins.oneclickshops.shops
 
 interface Shop {
 
