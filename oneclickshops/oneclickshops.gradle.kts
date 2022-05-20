@@ -10,7 +10,7 @@ project.extra["PluginName"] = "One Click Shops" // This is the name that is used
 project.extra["PluginDescription"] = "A one click shops script." // This is the description that is used in the external plugin manager panel
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
     annotationProcessor(Libraries.lombok)
     kapt(Libraries.pf4j)
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")

@@ -57,6 +57,7 @@ class OneClickWintertodtPlugin : Plugin() {
     var performAction = true
     private lateinit var food: List<Int>
     private var health = 25
+    private var debug = false
     private var gameStarted = true
     private var bankChest: GameObject? = null
     private var door: GameObject? = null
@@ -84,6 +85,7 @@ class OneClickWintertodtPlugin : Plugin() {
         gameStarted = false
         food = config.food().id.toList()
         health = config.health()
+        debug = config.debugger()
         state = States.IDLE
     }
 
@@ -103,6 +105,7 @@ class OneClickWintertodtPlugin : Plugin() {
     private fun onConfigChanged(event: ConfigChanged) {
         food = config.food().id.toList()
         health = config.health()
+        debug = config.debugger()
     }
 
     @Subscribe
@@ -134,7 +137,9 @@ class OneClickWintertodtPlugin : Plugin() {
             with(events) {
                 client.getItemContainer(InventoryID.INVENTORY.id)?.let { itemContainer = it.items }
                 handleLogic()
-                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "$state $performAction", "")
+                if(debug) {
+                    client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "State = $state Processing = $performAction", "")
+                }
                 if (!performAction) {
                     event.consume()
                 }

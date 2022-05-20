@@ -15,6 +15,7 @@ import net.runelite.client.plugins.oneclickshops.data.Shops
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
+import kotlin.reflect.KClass
 
 @Extension
 @PluginDescriptor(
@@ -40,6 +41,7 @@ class OneClickShopsPlugin : Plugin() {
     var performAction = true
     private lateinit var shop: Shops
     lateinit var items: List<Int>
+    lateinit var store: KClass<*>
 
     override fun startUp() {
         log.info("Starting One Click Shops")
@@ -54,6 +56,7 @@ class OneClickShopsPlugin : Plugin() {
         performAction = true
         shop = config.shop()
         items = config.items().lines().map { it.toInt() }.toList()
+        store = config.shop().clazz
     }
 
     var state by Delegates.observable(States.IDLE) { property, previous, current ->

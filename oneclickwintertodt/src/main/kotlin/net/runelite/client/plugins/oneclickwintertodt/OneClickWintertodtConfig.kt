@@ -52,6 +52,15 @@ interface OneClickWintertodtConfig : Config {
     fun health(): Int {
         return 25
     }
+    @ConfigItem(
+        position = 4,
+        keyName = "debugger",
+        name = "Debug text in chatbox",
+        description = "Debugger text",
+    )
+    fun debugger(): Boolean {
+        return true
+    }
 }
 
 
