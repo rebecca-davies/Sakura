@@ -53,13 +53,22 @@ interface OneClickWintertodtConfig : Config {
         return 25
     }
     @ConfigItem(
-        position = 4,
+        position = 5,
+        keyName = "healPyro",
+        name = "Heal Pyromancer",
+        description = "Heals the pyromancer instead of switching sides. (3 herblore)",
+    )
+    fun healPyro(): Boolean {
+        return false
+    }
+    @ConfigItem(
+        position = 6,
         keyName = "debugger",
         name = "Debug text in chatbox",
         description = "Debugger text",
     )
     fun debugger(): Boolean {
-        return true
+        return false
     }
 }
 

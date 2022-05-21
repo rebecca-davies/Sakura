@@ -5,7 +5,6 @@ import net.runelite.api.*
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
-import net.runelite.api.widgets.WidgetInfo
 import net.runelite.api.widgets.WidgetInfo.LEVEL_UP_CONTINUE
 import net.runelite.api.widgets.WidgetInfo.BANK_ITEM_CONTAINER as bank
 import net.runelite.api.widgets.WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER as bankInventory
@@ -23,7 +22,6 @@ import net.runelite.client.plugins.oneclickwintertodt.OneClickWintertodtConfig
 import net.runelite.client.plugins.oneclickwintertodt.api.inventory.Inventory
 import net.runelite.client.plugins.oneclickwintertodt.client.*
 import org.pf4j.Extension
-import java.util.*
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -55,6 +53,8 @@ class OneClickWintertodtPlugin : Plugin() {
     }
 
     var performAction = true
+    private var se = true
+    private var healPyro = false
     private lateinit var food: List<Int>
     private var health = 25
     private var debug = false
@@ -85,6 +85,7 @@ class OneClickWintertodtPlugin : Plugin() {
         gameStarted = false
         food = config.food().id.toList()
         health = config.health()
+        healPyro = config.healPyro()
         debug = config.debugger()
         state = States.IDLE
     }
@@ -105,6 +106,7 @@ class OneClickWintertodtPlugin : Plugin() {
     private fun onConfigChanged(event: ConfigChanged) {
         food = config.food().id.toList()
         health = config.health()
+        healPyro = config.healPyro()
         debug = config.debugger()
     }
 
@@ -124,11 +126,11 @@ class OneClickWintertodtPlugin : Plugin() {
         tinderboxCrate = client.findGameObject(TINDERBOX_CRATE)
         knifeCrate = client.findGameObject(KNIFE_CRATE)
         vialCrate = client.findGameObject(VIAL_CRATE)
-        unlitBrazier = client.findGameObject(UNLIT_BRAZIER)?.takeIf { it.worldLocation == SE_POS }
-        litBrazier = client.findGameObject(LIT_BRAZIER)?.takeIf { it.worldLocation == SE_POS }
-        brokenBrazier = client.findGameObject(BROKEN_BRAZIER)?.takeIf { it.worldLocation == SE_POS }
-        roots = client.findGameObject(ROOT)?.takeIf { it.worldLocation == SE_ROOT_POS }
-        herbPatch = client.findGameObject(HERB_PATCH)?.takeIf { it.worldLocation == HERB_POS }
+        unlitBrazier = client.findGameObject(UNLIT_BRAZIER)?.takeIf { if(se) it.worldLocation == SE_POS else it.worldLocation == SW_POS }
+        litBrazier = client.findGameObject(LIT_BRAZIER)?.takeIf { if(se) it.worldLocation == SE_POS else it.worldLocation == SW_POS }
+        brokenBrazier = client.findGameObject(BROKEN_BRAZIER)?.takeIf { if(se) it.worldLocation == SE_POS else it.worldLocation == SW_POS }
+        roots = client.findGameObject(ROOT)?.takeIf { if(se) it.worldLocation == SE_ROOT_POS else it.worldLocation == SW_ROOT_POS }
+        herbPatch = client.findGameObject(HERB_PATCH)?.takeIf { it.worldLocation == SE_HERB_POS }
     }
 
     @Subscribe
@@ -151,8 +153,12 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                         return
                     }
-                    States.WALK_TO_SE -> {
-                        event.walkTo(SOUTHEAST)
+                    States.WALK_TO_POS -> {
+                        if(se) {
+                            event.walkTo(SOUTHEAST)
+                        } else {
+                            event.walkTo(SOUTHWEST)
+                        }
                         return
                     }
                     States.PICK_HERB -> {
@@ -314,7 +320,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.EAT
                         return
                     }
-                    if (!inventory.contains(ItemID.REJUVENATION_POTION_UNF) && !inventory.contains(HEALING_POTIONS)) {
+                    if (healPyro && !inventory.contains(ItemID.REJUVENATION_POTION_UNF) && !inventory.contains(HEALING_POTIONS)) {
                         state = States.NEED_VIAL
                         return
                     }
@@ -334,8 +340,19 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.LEAVE_DOOR
                         return
                     }
+                    if(!healPyro) {
+                        if(se) {
+                            if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS) {
+                                se = false
+                            }
+                        } else {
+                            if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SW_PYROMANCER_POS) {
+                                se = true
+                            }
+                        }
+                    }
                     if (roots == null || unlitBrazier == null && litBrazier == null && brokenBrazier == null) {
-                        state = States.WALK_TO_SE
+                        state = States.WALK_TO_POS
                         performAction = true
                         return
                     }
@@ -354,15 +371,15 @@ class OneClickWintertodtPlugin : Plugin() {
                     if (litBrazier != null && !gameStarted) {
                         gameStarted = true
                     }
-                    if (client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(HEALING_POTIONS)) {
+                    if (healPyro && client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(HEALING_POTIONS)) {
                         state = States.HEAL_PYROMANCER
                         return
                     }
-                    if (inventory.contains(ItemID.BRUMA_HERB) && inventory.contains(ItemID.REJUVENATION_POTION_UNF)) {
+                    if (healPyro && inventory.contains(ItemID.BRUMA_HERB) && inventory.contains(ItemID.REJUVENATION_POTION_UNF)) {
                         state = States.MIX_VIAL
                         return
                     }
-                    if (client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(ItemID.REJUVENATION_POTION_UNF) && !inventory.contains(ItemID.BRUMA_HERB)) {
+                    if (healPyro && client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(ItemID.REJUVENATION_POTION_UNF) && !inventory.contains(ItemID.BRUMA_HERB)) {
                         state = States.PICK_HERB
                         return
                     }
