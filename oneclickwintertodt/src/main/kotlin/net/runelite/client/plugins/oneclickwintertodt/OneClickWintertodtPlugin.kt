@@ -320,6 +320,9 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.EAT
                         return
                     }
+                    if(client.getWidget(INTERFACE_TEXT)?.text?.isEmpty() == true) {
+                        gameStarted = true
+                    }
                     if (healPyro && !inventory.contains(ItemID.REJUVENATION_POTION_UNF) && !inventory.contains(HEALING_POTIONS)) {
                         state = States.NEED_VIAL
                         return
@@ -340,6 +343,10 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.LEAVE_DOOR
                         return
                     }
+                    if (brokenBrazier != null && state != States.WOODCUTTING) {
+                        state = States.REPAIR
+                        return
+                    }
                     if(!healPyro) {
                         if(se) {
                             if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS) {
@@ -356,7 +363,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         performAction = true
                         return
                     }
-                    if (gameStarted && state == States.GO_TO_BRAZIER && client.getWidget(INTERFACE_TEXT)?.text?.isEmpty()!!) {
+                    if (state == States.GO_TO_BRAZIER && client.getWidget(INTERFACE_TEXT)?.text?.isEmpty()!!) {
                         state = States.LIGHT_BRAZIER
                         return
                     }
@@ -367,9 +374,6 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.GO_TO_BRAZIER
                         gameStarted = false
                         return
-                    }
-                    if (litBrazier != null && !gameStarted) {
-                        gameStarted = true
                     }
                     if (healPyro && client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && inventory.contains(HEALING_POTIONS)) {
                         state = States.HEAL_PYROMANCER
@@ -383,9 +387,6 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.PICK_HERB
                         return
                     }
-                    if (state == States.LIGHT_BRAZIER && unlitBrazier != null) {
-                        return
-                    }
                     if (state == States.FIREMAKING && unlitBrazier != null) {
                         state = States.LIGHT_BRAZIER
                         return
@@ -394,23 +395,12 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.FLETCHING
                         return
                     }
-                    if (!inventory.contains(ItemID.BRUMA_KINDLING)) {
-                        if (client.localPlayer!!.animation == -1) {
-                            performAction = true
-                        }
+                    if (!inventory.contains(ItemID.BRUMA_KINDLING) && litBrazier != null) {
                         state = States.WOODCUTTING
                         return
                     }
                     if (inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) {
                         state = States.FIREMAKING
-                        return
-                    }
-                    if (brokenBrazier != null) {
-                        state = States.REPAIR
-                        return
-                    }
-                    if (unlitBrazier != null) {
-                        state = States.LIGHT_BRAZIER
                         return
                     }
                     state = States.IDLE
