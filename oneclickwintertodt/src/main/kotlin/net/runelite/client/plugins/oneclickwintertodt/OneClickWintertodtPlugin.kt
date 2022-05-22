@@ -83,11 +83,11 @@ class OneClickWintertodtPlugin : Plugin() {
     private fun reset() {
         performAction = true
         gameStarted = false
+        state = States.IDLE
         food = config.food().id.toList()
         health = config.health()
         healPyro = config.healPyro()
         debug = config.debugger()
-        state = States.IDLE
     }
 
     private var itemContainer: Array<Item> by Delegates.observable(arrayOf()) { property, previous, current ->

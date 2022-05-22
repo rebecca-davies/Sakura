@@ -58,6 +58,7 @@ interface OneClickWintertodtConfig : Config {
         name = "Heal Pyromancer",
         description = "Heals the pyromancer instead of switching sides. (3 herblore)",
     )
+    @JvmDefault
     fun healPyro(): Boolean {
         return false
     }
@@ -67,6 +68,7 @@ interface OneClickWintertodtConfig : Config {
         name = "Debug text in chatbox",
         description = "Debugger text",
     )
+    @JvmDefault
     fun debugger(): Boolean {
         return false
     }
