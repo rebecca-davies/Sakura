@@ -199,6 +199,12 @@ class OneClickWintertodtPlugin : Plugin() {
                             }
                         }
                     }
+                    States.REPAIR -> {
+                        brokenBrazier?.let {
+                            event.use(it)
+                            return
+                        }
+                    }
                     States.RETURN_INSIDE -> {
                         door?.let {
                             event.use(it)
