@@ -12,7 +12,11 @@ interface OneClickWintertodtConfig : Config {
         CAKE("Cake", listOf(ItemID.SLICE_OF_CAKE, ItemID._23_CAKE, ItemID.CAKE)),
         TROUT("Trout", listOf(ItemID.TROUT)),
         SALMON("Salmon", listOf(ItemID.SALMON)),
+        TUNA("Tuna", listOf(ItemID.TUNA)),
         LOBSTER("Lobster", listOf(ItemID.LOBSTER)),
+        POTATO_AND_CHEESE("Potato with Cheese", listOf(ItemID.POTATO_WITH_CHEESE)),
+        SWORDFISH("Swordfish", listOf(ItemID.SWORDFISH)),
+        KARAMBWAN("Karambwan", listOf(ItemID.COOKED_KARAMBWAN)),
         SHARK("Shark", listOf(ItemID.SHARK));
 
         override fun toString(): String {
@@ -54,6 +58,16 @@ interface OneClickWintertodtConfig : Config {
     }
     @ConfigItem(
         position = 5,
+        keyName = "doFletch",
+        name = "Fletch logs",
+        description = "Fletches the logs into kindling for more reward points.",
+    )
+    @JvmDefault
+    fun doFletch(): Boolean {
+        return true
+    }
+    @ConfigItem(
+        position = 6,
         keyName = "healPyro",
         name = "Heal Pyromancer",
         description = "Heals the pyromancer instead of switching sides. (3 herblore)",
@@ -63,7 +77,7 @@ interface OneClickWintertodtConfig : Config {
         return false
     }
     @ConfigItem(
-        position = 6,
+        position = 7,
         keyName = "debugger",
         name = "Debug text in chatbox",
         description = "Debugger text",

@@ -1,5 +1,7 @@
 package net.runelite.client.plugins.oneclickshops
 
 enum class States {
-    IDLE
+    IDLE,
+    BUILD,
+    REMOVE
 }

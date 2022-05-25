@@ -97,6 +97,7 @@ class OneClickLavasPlugin : Plugin() {
 
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
+        log.debug("Before -- MenuOption={} MenuTarget={} Id={} Opcode={} Param0={} Param1={} isItemOp={} ItemOp={} ItemId={} Widget={}", event.menuOption, event.menuTarget, event.id, event.menuAction, event.param0, event.param1, event.isItemOp, event.itemOp, event.itemId, event.widget);
         with(actions) {
             checkStates()
             client.getItemContainer(InventoryID.INVENTORY.id)?.let {

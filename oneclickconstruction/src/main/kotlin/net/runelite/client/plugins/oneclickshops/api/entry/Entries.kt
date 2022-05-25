@@ -73,6 +73,19 @@ class Entries {
         }
     }
 
+    fun MenuOptionClicked.interact(gameObject: GameObject) {
+        try {
+            this.menuOption = "One click construction"
+            this.menuTarget = ""
+            this.id = gameObject.id
+            this.menuAction = MenuAction.GAME_OBJECT_FIFTH_OPTION
+            this.param0 = gameObject.sceneMinLocation.x
+            this.param1 = gameObject.sceneMinLocation.y
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
     fun MenuOptionClicked.useOn(item: Widget, used: Widget?) {
         try {
             used?.let {

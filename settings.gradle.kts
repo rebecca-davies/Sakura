@@ -26,7 +26,6 @@
 rootProject.name = "Externals"
 include(":oneclicklavas")
 include(":oneclickwintertodt")
-include(":oneclickshops")
 include(":oneclickconstruction")
 for (project in rootProject.children) {
     project.apply {

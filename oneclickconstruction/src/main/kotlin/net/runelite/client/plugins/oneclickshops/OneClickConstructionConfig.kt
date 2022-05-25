@@ -25,11 +25,11 @@ interface OneClickConstructionConfig : Config {
         position = 2)
     @JvmDefault
     fun text(): String {
-        return "Select the method of training you want to use, if you're below 40 construction it's recommended to have your house at Rimmington and having noted planks to unnote which you can toggle with \"Un-note at Phials\""
+        return "Select the method of training you want to use, if you're below 40 construction it's recommended to have your house at Rimmington and having noted planks to unnote which you can toggle with \"Unnote at Phials\""
     }
     @ConfigItem(
         keyName = "method",
-        name = "method",
+        name = "Method",
         description = "Select the method to train with",
         position = 3)
     @JvmDefault
@@ -39,17 +39,18 @@ interface OneClickConstructionConfig : Config {
     @ConfigItem(
         position = 4,
         keyName = "runToUnnote",
-        name = "Un-note at Phials",
+        name = "Unnote at Phials",
         description = "Recommended to below level 40.",
     )
+    @JvmDefault
     fun runToUnnote(): Boolean {
         return false
     }
 
     enum class Constructables(val type: String, val buildable: Int, val built: Int) {
-        OAK_LARDER("Oak Larder", 0, 0),
-        OAK_DOOR("Oak Door",0, 0),
-        MAHOGANY_TABLE("Mahogany table", 0, 0),
-        MYTH_CAPE("Mounted Myth Cape", 0, 0),
+        OAK_LARDER("Oak Larder", 15403, 13566),
+        OAK_DOOR("Oak Door",15328, 13344),
+        MAHOGANY_TABLE("Mahogany table", 15298, 13298),
+        MYTH_CAPE("Mounted Myth Cape", 15394, 31986),
     }
 }

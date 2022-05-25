@@ -2,6 +2,7 @@ package net.runelite.client
 
 import com.google.inject.Provides
 import net.runelite.api.*
+import net.runelite.api.events.ChatMessage
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
@@ -57,6 +58,8 @@ class OneClickWintertodtPlugin : Plugin() {
     private var healPyro = false
     private lateinit var food: List<Int>
     private var health = 25
+    private var fletch = true
+    private var canBurn = false
     private var debug = false
     private var gameStarted = true
     private var bankChest: GameObject? = null
@@ -88,11 +91,20 @@ class OneClickWintertodtPlugin : Plugin() {
         health = config.health()
         healPyro = config.healPyro()
         debug = config.debugger()
+        fletch = config.doFletch()
     }
 
     private var itemContainer: Array<Item> by Delegates.observable(arrayOf()) { property, previous, current ->
-        if(state == States.EAT) {
-            performAction = true
+        with(inventories) {
+            if (state == States.EAT) {
+                performAction = true
+            }
+            if (state == States.WOODCUTTING && inventory.freeSpace() <= 0) {
+                canBurn = true
+            }
+            if (state == States.FIREMAKING && !inventory.contains(ItemID.BRUMA_ROOT)) {
+                canBurn = false
+            }
         }
     }
 
@@ -108,6 +120,7 @@ class OneClickWintertodtPlugin : Plugin() {
         health = config.health()
         healPyro = config.healPyro()
         debug = config.debugger()
+        fletch = config.doFletch()
     }
 
     @Subscribe
@@ -183,6 +196,10 @@ class OneClickWintertodtPlugin : Plugin() {
                     States.DEPOSIT_ITEMS -> {
                         bankInventory.getItem(ItemID.SUPPLY_CRATE)?.let {
                             event.clickItem(it, 2, bankInventory)
+                            return
+                        }
+                        bankInventory.getItem(ItemID.JUG)?.let {
+                            event.clickItem(it, 8, bankInventory)
                             return
                         }
                     }
@@ -273,6 +290,11 @@ class OneClickWintertodtPlugin : Plugin() {
                 }
             }
         }
+        if(event.menuOption.equals("Walk here", ignoreCase = true)){
+            log.info("Consuming walk")
+            event.consume()
+            return;
+        }
     }
 
     private fun handleLogic() {
@@ -287,7 +309,7 @@ class OneClickWintertodtPlugin : Plugin() {
                             state = States.WITHDRAW_FOOD
                             return
                         }
-                        if (bankInventory.contains(ItemID.SUPPLY_CRATE)) {
+                        if (bankInventory.contains(ItemID.SUPPLY_CRATE) || bankInventory.contains(ItemID.JUG)) {
                             state = States.DEPOSIT_ITEMS
                             return
                         }
@@ -397,15 +419,15 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.LIGHT_BRAZIER
                         return
                     }
-                    if (inventory.contains(ItemID.BRUMA_ROOT) && (inventory.freeSpace() <= 0 || (inventory.quantity(ItemID.BRUMA_ROOT) + inventory.quantity(ItemID.BRUMA_KINDLING)) >= 10)) {
+                    if (fletch && inventory.contains(ItemID.BRUMA_ROOT) && (inventory.freeSpace() <= 0 || (inventory.quantity(ItemID.BRUMA_ROOT) + inventory.quantity(ItemID.BRUMA_KINDLING)) >= 10)) {
                         state = States.FLETCHING
                         return
                     }
-                    if (!inventory.contains(ItemID.BRUMA_KINDLING) && litBrazier != null) {
+                    if ((fletch && !inventory.contains(ItemID.BRUMA_KINDLING) && litBrazier != null) || (!fletch && !canBurn)) {
                         state = States.WOODCUTTING
                         return
                     }
-                    if (inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) {
+                    if ((fletch && inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) || (!fletch && canBurn)) {
                         state = States.FIREMAKING
                         return
                     }
