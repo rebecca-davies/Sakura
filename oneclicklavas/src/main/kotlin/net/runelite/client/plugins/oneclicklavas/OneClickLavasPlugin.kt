@@ -212,6 +212,11 @@ class OneClickLavasPlugin : Plugin() {
                 else -> return
             }
         }
+        if(event.menuOption.equals("Walk here", ignoreCase = true)){
+            log.info("Consuming walk")
+            event.consume()
+            return;
+        }
     }
 
     private fun checkStates() {

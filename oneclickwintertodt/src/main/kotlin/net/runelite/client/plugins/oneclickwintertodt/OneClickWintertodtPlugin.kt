@@ -423,7 +423,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.FLETCHING
                         return
                     }
-                    if ((fletch && !inventory.contains(ItemID.BRUMA_KINDLING) && litBrazier != null) || (!fletch && !canBurn)) {
+                    if ((fletch && !inventory.contains(ItemID.BRUMA_KINDLING) && litBrazier != null) || (!fletch && !canBurn && litBrazier != null)) {
                         state = States.WOODCUTTING
                         return
                     }
