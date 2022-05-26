@@ -334,7 +334,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     bankChest?.let {
-                        if (inventory.quantity(food) <= foodAmount ||  inventory.contains(ItemID.SUPPLY_CRATE)) {
+                        if (inventory.quantity(food) < foodAmount ||  inventory.contains(ItemID.SUPPLY_CRATE)) {
                             if (!client.localPlayer.isMoving) {
                                 performAction = true
                             }
@@ -390,12 +390,8 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.NEED_TINDERBOX
                         return
                     }
-                    if ((!gameStarted && inventory.quantity(food) <= foodAmount) || inventory.contains(ItemID.SUPPLY_CRATE)) {
+                    if ((!gameStarted && inventory.quantity(food) < foodAmount) || inventory.contains(ItemID.SUPPLY_CRATE)) {
                         state = States.LEAVE_DOOR
-                        return
-                    }
-                    if (brokenBrazier != null && state != States.WOODCUTTING) {
-                        state = States.REPAIR
                         return
                     }
                     if(!healPyro) {
@@ -438,10 +434,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.PICK_HERB
                         return
                     }
-                    if (state == States.FIREMAKING && unlitBrazier != null) {
-                        state = States.LIGHT_BRAZIER
-                        return
-                    }
+
                     if (fletch && inventory.contains(ItemID.BRUMA_ROOT) && (inventory.freeSpace() <= 0 || (inventory.quantity(ItemID.BRUMA_ROOT) + inventory.quantity(ItemID.BRUMA_KINDLING)) >= 10)) {
                         state = States.FLETCHING
                         return
@@ -450,8 +443,16 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.WOODCUTTING
                         return
                     }
-                    if ((fletch && inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) || (!fletch && canBurn)) {
+                    if ((fletch && inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) || (!fletch && canBurn && litBrazier != null)) {
                         state = States.FIREMAKING
+                        return
+                    }
+                    if (state == States.FIREMAKING && unlitBrazier != null) {
+                        state = States.LIGHT_BRAZIER
+                        return
+                    }
+                    if (brokenBrazier != null && state != States.WOODCUTTING) {
+                        state = States.REPAIR
                         return
                     }
                     state = States.IDLE
