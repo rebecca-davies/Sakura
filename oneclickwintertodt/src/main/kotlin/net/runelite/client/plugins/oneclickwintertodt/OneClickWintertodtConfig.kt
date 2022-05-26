@@ -45,9 +45,18 @@ interface OneClickWintertodtConfig : Config {
     fun food(): Food {
         return Food.CAKE
     }
-
     @ConfigItem(
         position = 3,
+        keyName = "foodAmount",
+        name = "Amount of food",
+        description = "Set the amount of food to bring",
+    )
+    @JvmDefault
+    fun foodAmount(): Int {
+        return 4
+    }
+    @ConfigItem(
+        position = 4,
         keyName = "health",
         name = "Eat health",
         description = "Set the health your player will eat at",

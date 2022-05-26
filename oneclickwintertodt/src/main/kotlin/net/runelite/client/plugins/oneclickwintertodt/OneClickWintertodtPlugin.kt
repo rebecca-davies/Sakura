@@ -57,6 +57,8 @@ class OneClickWintertodtPlugin : Plugin() {
     private var se = true
     private var healPyro = false
     private lateinit var food: List<Int>
+    private var foodAmount = 4
+    private var timeout = 0
     private var health = 25
     private var fletch = true
     private var canBurn = false
@@ -88,10 +90,12 @@ class OneClickWintertodtPlugin : Plugin() {
         gameStarted = false
         state = States.IDLE
         food = config.food().id.toList()
+        foodAmount = config.foodAmount()
         health = config.health()
         healPyro = config.healPyro()
         debug = config.debugger()
         fletch = config.doFletch()
+        timeout = 0
     }
 
     private var itemContainer: Array<Item> by Delegates.observable(arrayOf()) { property, previous, current ->
@@ -117,6 +121,7 @@ class OneClickWintertodtPlugin : Plugin() {
     @Subscribe
     private fun onConfigChanged(event: ConfigChanged) {
         food = config.food().id.toList()
+        foodAmount = config.foodAmount()
         health = config.health()
         healPyro = config.healPyro()
         debug = config.debugger()
@@ -133,6 +138,9 @@ class OneClickWintertodtPlugin : Plugin() {
 
     @Subscribe
     private fun onGameTick(event: GameTick) {
+        if (timeout > 0) {
+            timeout--
+        }
         bankChest = client.findGameObject(BANK_CHEST)
         door = client.findGameObject(DOOR)
         hammerCrate = client.findGameObject(HAMMER_CRATE)
@@ -151,6 +159,10 @@ class OneClickWintertodtPlugin : Plugin() {
         with(inventories) {
             with(events) {
                 client.getItemContainer(InventoryID.INVENTORY.id)?.let { itemContainer = it.items }
+                if (timeout != 0) {
+                    event.consume()
+                    return
+                }
                 handleLogic()
                 if(debug) {
                     client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "State = $state Processing = $performAction", "")
@@ -189,13 +201,15 @@ class OneClickWintertodtPlugin : Plugin() {
 
                     States.WITHDRAW_FOOD -> {
                         bank.getItem(food.last())?.let {
-                            event.clickItem(it, 3, bank)
+                            event.clickItem(it, 1, bank)
+                            performAction = true
+                            timeout = 1
                             return
                         }
                     }
                     States.DEPOSIT_ITEMS -> {
                         bankInventory.getItem(ItemID.SUPPLY_CRATE)?.let {
-                            event.clickItem(it, 2, bankInventory)
+                            event.clickItem(it, 8, bankInventory)
                             return
                         }
                         bankInventory.getItem(ItemID.JUG)?.let {
@@ -223,6 +237,12 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.RETURN_INSIDE -> {
+                        door?.let {
+                            event.use(it)
+                            return
+                        }
+                    }
+                    States.WAIT_TO_LEAVE -> {
                         door?.let {
                             event.use(it)
                             return
@@ -291,7 +311,6 @@ class OneClickWintertodtPlugin : Plugin() {
             }
         }
         if(event.menuOption.equals("Walk here", ignoreCase = true)){
-            log.info("Consuming walk")
             event.consume()
             return;
         }
@@ -305,7 +324,7 @@ class OneClickWintertodtPlugin : Plugin() {
             when (client.localPlayer!!.worldLocation.regionID) {
                 BANK_REGION -> {
                     if (client.banking()) {
-                        if (bankInventory.quantity(food) <= 4) {
+                        if (bankInventory.quantity(food) < foodAmount) {
                             state = States.WITHDRAW_FOOD
                             return
                         }
@@ -315,7 +334,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     bankChest?.let {
-                        if (inventory.quantity(food) <= 4 ||  inventory.contains(ItemID.SUPPLY_CRATE)) {
+                        if (inventory.quantity(food) <= foodAmount ||  inventory.contains(ItemID.SUPPLY_CRATE)) {
                             if (!client.localPlayer.isMoving) {
                                 performAction = true
                             }
@@ -342,6 +361,10 @@ class OneClickWintertodtPlugin : Plugin() {
 
                     if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= health) {
                         if (!inventory.contains(food)) {
+                            if(client.getWidget(POINTS_STRING)?.text?.filter { it.isDigit() }?.toInt()!! >= 500) {
+                                state = States.WAIT_TO_LEAVE
+                                return
+                            }
                             state = States.LEAVE_DOOR
                             return
                         }
@@ -367,7 +390,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.NEED_TINDERBOX
                         return
                     }
-                    if ((!gameStarted && inventory.quantity(food) <= 4) || inventory.contains(ItemID.SUPPLY_CRATE)) {
+                    if ((!gameStarted && inventory.quantity(food) <= foodAmount) || inventory.contains(ItemID.SUPPLY_CRATE)) {
                         state = States.LEAVE_DOOR
                         return
                     }

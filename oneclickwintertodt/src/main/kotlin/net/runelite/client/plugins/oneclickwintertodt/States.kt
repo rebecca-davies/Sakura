@@ -22,6 +22,6 @@ enum class States {
     PICK_HERB,
     MIX_VIAL,
     HEAL_PYROMANCER,
-    WALK_TO_POS
-
+    WALK_TO_POS,
+    WAIT_TO_LEAVE
 }
