@@ -11,7 +11,12 @@ class Inventory {
     lateinit var client: Client
 
     fun WidgetInfo.getItem(id: Int): Widget? {
-        return client.getWidget(this)?.dynamicChildren?.first { it.itemId == id }
+        try {
+            return client.getWidget(this)?.dynamicChildren?.first { it.itemId == id }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 
     fun WidgetInfo.contains(id: List<Any>): Boolean {

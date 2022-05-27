@@ -334,7 +334,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     bankChest?.let {
-                        if (inventory.quantity(food) < foodAmount ||  inventory.contains(ItemID.SUPPLY_CRATE)) {
+                        if (inventory.quantity(food) < foodAmount || inventory.contains(ItemID.SUPPLY_CRATE)) {
                             if (!client.localPlayer.isMoving) {
                                 performAction = true
                             }
