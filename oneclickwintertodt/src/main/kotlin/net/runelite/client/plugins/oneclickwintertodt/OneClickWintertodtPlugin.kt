@@ -59,6 +59,7 @@ class OneClickWintertodtPlugin : Plugin() {
     private lateinit var food: List<Int>
     private var foodAmount = 4
     private var timeout = 0
+    private var relight = false
     private var health = 25
     private var fletch = true
     private var canBurn = false
@@ -96,6 +97,7 @@ class OneClickWintertodtPlugin : Plugin() {
         debug = config.debugger()
         fletch = config.doFletch()
         timeout = 0
+        relight = false
     }
 
     private var itemContainer: Array<Item> by Delegates.observable(arrayOf()) { property, previous, current ->
@@ -130,7 +132,7 @@ class OneClickWintertodtPlugin : Plugin() {
 
     @Subscribe
     private fun onHitsplatApplied(event: HitsplatApplied) {
-        if(event.actor == client.localPlayer) {
+        if(event.actor == client.localPlayer && state != States.WOODCUTTING) {
             performAction = true
             return
         }
@@ -141,6 +143,7 @@ class OneClickWintertodtPlugin : Plugin() {
         if (timeout > 0) {
             timeout--
         }
+
         bankChest = client.findGameObject(BANK_CHEST)
         door = client.findGameObject(DOOR)
         hammerCrate = client.findGameObject(HAMMER_CRATE)
@@ -152,6 +155,10 @@ class OneClickWintertodtPlugin : Plugin() {
         brokenBrazier = client.findGameObject(BROKEN_BRAZIER)?.takeIf { if(se) it.worldLocation == SE_POS else it.worldLocation == SW_POS }
         roots = client.findGameObject(ROOT)?.takeIf { if(se) it.worldLocation == SE_ROOT_POS else it.worldLocation == SW_ROOT_POS }
         herbPatch = client.findGameObject(HERB_PATCH)?.takeIf { it.worldLocation == SE_HERB_POS }
+
+        if(unlitBrazier != null) {
+            relight = true
+        }
     }
 
     @Subscribe
@@ -321,6 +328,10 @@ class OneClickWintertodtPlugin : Plugin() {
             if(client.getWidget(LEVEL_UP_CONTINUE) != null) {
                 performAction = true
             }
+            if(state == States.FIREMAKING && relight) {
+                performAction = true
+                relight = false
+            }
             when (client.localPlayer!!.worldLocation.regionID) {
                 BANK_REGION -> {
                     if (client.banking()) {
@@ -412,6 +423,7 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                     if (state == States.GO_TO_BRAZIER && client.getWidget(INTERFACE_TEXT)?.text?.isEmpty()!!) {
                         state = States.LIGHT_BRAZIER
+                        relight = true
                         return
                     }
                     if (client.getWidget(INTERFACE_TEXT)?.text?.contains("0:00", true) == true) {
@@ -443,15 +455,15 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.WOODCUTTING
                         return
                     }
-                    if ((fletch && inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) || (!fletch && canBurn && litBrazier != null)) {
+                    if ((fletch && inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && unlitBrazier == null) || (!fletch && canBurn && unlitBrazier == null)) {
                         state = States.FIREMAKING
                         return
                     }
-                    if (state == States.FIREMAKING && unlitBrazier != null) {
+                    if (state != States.WOODCUTTING && unlitBrazier != null) {
                         state = States.LIGHT_BRAZIER
                         return
                     }
-                    if (brokenBrazier != null && state != States.WOODCUTTING) {
+                    if (state != States.WOODCUTTING && brokenBrazier != null) {
                         state = States.REPAIR
                         return
                     }
