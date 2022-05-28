@@ -26,11 +26,13 @@ val SE_POS = WorldPoint(1639, 3998, 0)
 val SE_PYROMANCER_POS = WorldPoint(1641, 3996, 0)
 val SE_ROOT_POS = WorldPoint(1639, 3988, 0)
 val SE_HERB_POS = WorldPoint(1649, 4007, 0)
+val SE_HIDEY_HOLE = WorldPoint(1638, 3988, 0)
 val SOUTHEAST = WorldPoint(1640, 3993, 0)
 
 val SW_POS = WorldPoint(1621, 3998, 0)
 val SW_PYROMANCER_POS = WorldPoint(1619, 3996, 0)
 val SW_ROOT_POS = WorldPoint(1620, 3988, 0)
+val SW_HIDEY_HOLE = WorldPoint(1622, 3988, 0)
 val SOUTHWEST = WorldPoint(1619, 3993, 0)
 
 val LOBBY_AREA = WorldArea(1626, 3978, 8, 8, 0)

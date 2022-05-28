@@ -23,5 +23,6 @@ enum class States {
     MIX_VIAL,
     HEAL_PYROMANCER,
     WALK_TO_POS,
-    WAIT_TO_LEAVE
+    WAIT_TO_LEAVE,
+    MOVE_TO_HIDEY_HOLE
 }

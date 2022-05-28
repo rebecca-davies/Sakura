@@ -6,6 +6,7 @@ import net.runelite.api.events.ChatMessage
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
+import net.runelite.api.widgets.WidgetInfo
 import net.runelite.api.widgets.WidgetInfo.LEVEL_UP_CONTINUE
 import net.runelite.api.widgets.WidgetInfo.BANK_ITEM_CONTAINER as bank
 import net.runelite.api.widgets.WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER as bankInventory
@@ -25,6 +26,7 @@ import net.runelite.client.plugins.oneclickwintertodt.client.*
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
+import net.runelite.api.widgets.WidgetInfo.EQUIPMENT_WEAPON as equipment
 
 @Extension
 @PluginDescriptor(
@@ -65,6 +67,7 @@ class OneClickWintertodtPlugin : Plugin() {
     private var canBurn = false
     private var debug = false
     private var gameStarted = true
+    private var hideyHole = SE_HIDEY_HOLE
     private var bankChest: GameObject? = null
     private var door: GameObject? = null
     private var hammerCrate: GameObject? = null
@@ -98,6 +101,8 @@ class OneClickWintertodtPlugin : Plugin() {
         fletch = config.doFletch()
         timeout = 0
         relight = false
+        se = true
+        hideyHole = SE_HIDEY_HOLE
     }
 
     private var itemContainer: Array<Item> by Delegates.observable(arrayOf()) { property, previous, current ->
@@ -193,6 +198,10 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                         return
                     }
+                    States.MOVE_TO_HIDEY_HOLE -> {
+                        event.walkTo(hideyHole)
+                        return
+                    }
                     States.PICK_HERB -> {
                         herbPatch?.let {
                             event.use(it)
@@ -264,6 +273,8 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                     States.CONFIRM_EXIT -> {
                         event.talk(1, 14352385)
+                        se = true
+                        hideyHole = SE_HIDEY_HOLE
                         return
                     }
                     States.NEED_VIAL -> {
@@ -313,7 +324,6 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.IDLE -> {}
-                    else -> {}
                 }
             }
         }
@@ -343,6 +353,10 @@ class OneClickWintertodtPlugin : Plugin() {
                             state = States.DEPOSIT_ITEMS
                             return
                         }
+                    }
+                    if (client.getBoostedSkillLevel(Skill.HITPOINTS) < client.getRealSkillLevel(Skill.HITPOINTS) && inventory.contains(food)) {
+                        state = States.EAT
+                        return
                     }
                     bankChest?.let {
                         if (inventory.quantity(food) < foodAmount || inventory.contains(ItemID.SUPPLY_CRATE)) {
@@ -393,11 +407,11 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.NEED_HAMMER
                         return
                     }
-                    if (!inventory.contains(ItemID.KNIFE)) {
+                    if (!inventory.contains(ItemID.KNIFE) && fletch) {
                         state = States.NEED_KNIFE
                         return
                     }
-                    if (!inventory.contains(ItemID.TINDERBOX)) {
+                    if (!inventory.contains(ItemID.TINDERBOX) && !equipment.wearing(ItemID.BRUMA_TORCH)) {
                         state = States.NEED_TINDERBOX
                         return
                     }
@@ -409,9 +423,11 @@ class OneClickWintertodtPlugin : Plugin() {
                         if(se) {
                             if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS) {
                                 se = false
+                                hideyHole = SW_HIDEY_HOLE
                             }
                         } else {
                             if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SW_PYROMANCER_POS) {
+                                hideyHole = SE_HIDEY_HOLE
                                 se = true
                             }
                         }
@@ -451,7 +467,11 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.FLETCHING
                         return
                     }
-                    if ((fletch && !inventory.contains(ItemID.BRUMA_KINDLING) && litBrazier != null) || (!fletch && !canBurn && litBrazier != null)) {
+                    if (((fletch && !inventory.contains(ItemID.BRUMA_KINDLING) && litBrazier != null) || (!fletch && !canBurn && litBrazier != null)) && client.localPlayer.animation != 733) {
+                        if(!client.localPlayer.worldLocation.equals(hideyHole)) {
+                            state = States.MOVE_TO_HIDEY_HOLE
+                            return
+                        }
                         state = States.WOODCUTTING
                         return
                     }

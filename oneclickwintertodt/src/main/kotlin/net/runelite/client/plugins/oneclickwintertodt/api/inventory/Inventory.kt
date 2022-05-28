@@ -38,4 +38,8 @@ class Inventory {
     fun WidgetInfo.freeSpace(): Int {
         return 28 - client.getWidget(this)?.dynamicChildren?.filter { it.itemId != 6512 }?.size!!
     }
+
+    fun WidgetInfo.wearing(id: Int): Boolean {
+        return this.contains(id)
+    }
 }
