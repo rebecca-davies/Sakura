@@ -9,15 +9,14 @@ import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.ConfigChanged
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
-import net.runelite.client.plugins.oneclickshops.States
-import net.runelite.client.plugins.oneclickshops.util.Log
-import net.runelite.client.plugins.oneclickshops.OneClickConstructionConfig
-import net.runelite.client.plugins.oneclickshops.api.entry.Entries
-import net.runelite.client.plugins.oneclickshops.client.findGameObject
+import net.runelite.client.plugins.oneclickconstruction.States
+import net.runelite.client.plugins.oneclickconstruction.util.Log
+import net.runelite.client.plugins.oneclickconstruction.OneClickConstructionConfig
+import net.runelite.client.plugins.oneclickconstruction.api.entry.Entries
+import net.runelite.client.plugins.oneclickconstruction.client.findGameObject
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
-import kotlin.reflect.KClass
 
 @Extension
 @PluginDescriptor(

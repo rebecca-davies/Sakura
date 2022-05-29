@@ -1,15 +1,13 @@
-package net.runelite.client.plugins.oneclicklavas.util
+package net.runelite.client.plugins.oneclicklavas.api.entry
 
 import net.runelite.api.*
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.widgets.Widget
-import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.OneClickLavasPlugin
 import net.runelite.client.plugins.oneclicklavas.getInventoryItem
-import net.runelite.client.plugins.oneclicklavas.getInventorySpace
 import javax.inject.Inject
 
-class Actions {
+class Entries {
 
     @Inject
     lateinit var client: Client
@@ -19,7 +17,7 @@ class Actions {
 
     fun MenuOptionClicked.clickItem(item: Widget, action: Int, container: Int) {
         try {
-            this.menuOption = ""
+            this.menuOption = "One Click Lavas"
             this.menuTarget = ""
             this.id = action
             this.menuAction = if (action < 6) MenuAction.CC_OP else MenuAction.CC_OP_LOW_PRIORITY
@@ -32,7 +30,7 @@ class Actions {
 
     fun MenuOptionClicked.closeBank() {
         try {
-            this.menuOption = "Close"
+            this.menuOption = "One Click Lavas"
             this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
@@ -43,27 +41,14 @@ class Actions {
         }
     }
 
-    fun MenuOptionClicked.rub() {
+    fun MenuOptionClicked.teleport(action: Int, container: Int) {
         try {
-            this.menuOption = "Fire Altar"
-            this.menuTarget = "<col=ff9040>Ring of the elements</col>"
-            this.id = 6
-            this.menuAction = MenuAction.CC_OP_LOW_PRIORITY
+            this.menuOption = "One Click Lavas"
+            this.menuTarget = ""
+            this.id = action
+            this.menuAction = if (action < 6) MenuAction.CC_OP else MenuAction.CC_OP_LOW_PRIORITY
             this.param0 = -1
-            this.param1 = 25362456
-        } catch (e: Exception) {
-            this.consume()
-        }
-    }
-
-    fun MenuOptionClicked.teleport() {
-        try {
-            this.menuOption = "Teleport"
-            this.menuTarget = "<col=ff9040>Crafting cape(t)</col>"
-            this.id = 3
-            this.menuAction = MenuAction.CC_OP
-            this.param0 = -1
-            this.param1 = 25362448
+            this.param1 = container
         } catch (e: Exception) {
             this.consume()
         }
@@ -71,8 +56,8 @@ class Actions {
 
     fun MenuOptionClicked.imbue() {
         try {
-            this.menuOption = "Cast"
-            this.menuTarget = "<col=00ff00>Magic Imbue</col>"
+            this.menuOption = "One Click Lavas"
+            this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
             this.param0 = -1
@@ -84,7 +69,7 @@ class Actions {
 
     fun MenuOptionClicked.use(gameObject: GameObject) {
         try {
-            this.menuOption = ""
+            this.menuOption = "One Click Lavas"
             this.menuTarget = ""
             this.id = gameObject.id
             this.menuAction = MenuAction.GAME_OBJECT_FIRST_OPTION
@@ -127,7 +112,7 @@ class Actions {
                 client.selectedSpellWidget = it.id
                 client.selectedSpellChildIndex = it.index
                 client.selectedSpellItemId = it.itemId
-                this.menuOption = "Use"
+                this.menuOption = "One Click Lavas"
                 this.menuTarget = ""
                 this.id = gameObject.id
                 this.menuAction = MenuAction.WIDGET_TARGET_ON_GAME_OBJECT
@@ -141,8 +126,8 @@ class Actions {
 
     private fun MenuOptionClicked.repair() {
         try {
-            this.menuOption = "Cast"
-            this.menuTarget = "<col=00ff00>NPC Contact</col>"
+            this.menuOption = "One Click Lavas"
+            this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
             this.param0 = -1
@@ -154,7 +139,7 @@ class Actions {
 
     private fun MenuOptionClicked.mage() {
         try {
-            this.menuOption = "Dark Mage"
+            this.menuOption = "One Click Lavas"
             this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
@@ -167,7 +152,7 @@ class Actions {
 
     private fun MenuOptionClicked.talk(param0: Int, param1: Int) {
         try {
-            this.menuOption = "Continue"
+            this.menuOption = "One Click Lavas"
             this.menuTarget = ""
             this.id = 0
             this.menuAction = MenuAction.WIDGET_CONTINUE
@@ -194,10 +179,10 @@ class Actions {
                 }
 
                 client.getWidget(14352385)?.dynamicChildren?.forEachIndexed { index, widget ->
-                        if(widget.text.contains("repair", true)) {
-                            talk(index, 14352385)
-                        }
+                    if(widget.text.contains("repair", true)) {
+                        talk(index, 14352385)
                     }
+                }
                 client.getWidget(14221317)?.let {
                     talk(-1, 14221317)
                     plugin.attributes["repair"] = 0

@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclickshops.client
+package net.runelite.client.plugins.oneclickconstruction.client
 
 import net.runelite.api.Client
 import net.runelite.api.GameObject

@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclickshops.api.inventory
+package net.runelite.client.plugins.oneclickconstruction.api.inventory
 
 import net.runelite.api.Client
 import net.runelite.api.widgets.Widget

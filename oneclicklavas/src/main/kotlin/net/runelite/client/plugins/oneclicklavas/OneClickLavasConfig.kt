@@ -37,24 +37,24 @@ interface OneClickLavasConfig : Config {
     }
 
     @ConfigItem(
-        keyName = "teleport",
+        keyName = "altar",
         name = "Altar",
         description = "Select the altar teleport method",
         position = 3,
         title = "pouchConfig")
     @JvmDefault
-    fun banking(): AltarTeleport {
+    fun altar(): AltarTeleport {
         return AltarTeleport.RING_OF_THE_ELEMENTS
     }
 
     @ConfigItem(
-        keyName = "teleport",
+        keyName = "banking",
         name = "Bank",
         description = "Select the banking teleport method",
         position = 4,
         title = "pouchConfig")
     @JvmDefault
-    fun altar(): BankTeleport {
+    fun banking(): BankTeleport {
         return BankTeleport.CRAFTING_CAPE
     }
 

@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclickshops.api.entry
+package net.runelite.client.plugins.oneclickconstruction.api.entry
 
 import net.runelite.api.*
 import net.runelite.api.coords.LocalPoint

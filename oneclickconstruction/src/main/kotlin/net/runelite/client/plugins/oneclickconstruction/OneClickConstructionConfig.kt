@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclickshops
+package net.runelite.client.plugins.oneclickconstruction
 
 import net.runelite.client.config.Config
 import net.runelite.client.config.ConfigGroup

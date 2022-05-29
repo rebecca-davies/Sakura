@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclickshops.util
+package net.runelite.client.plugins.oneclickconstruction.util
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

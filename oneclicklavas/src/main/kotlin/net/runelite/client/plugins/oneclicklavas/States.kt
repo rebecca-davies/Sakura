@@ -18,5 +18,7 @@ enum class States {
     OPEN_BANK,
     DESTROY_NECKLACE,
     CONFIRM_DESTROY,
-    REPAIR
+    REPAIR,
+    NEED_RING,
+    EQUIP_RING
 }
