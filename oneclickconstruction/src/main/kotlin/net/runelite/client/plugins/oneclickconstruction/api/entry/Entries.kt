@@ -73,14 +73,14 @@ class Entries {
         }
     }
 
-    fun MenuOptionClicked.interact(gameObject: GameObject) {
+    fun MenuOptionClicked.interact(gameObject: TileObject) {
         try {
             this.menuOption = "One click construction"
             this.menuTarget = ""
             this.id = gameObject.id
             this.menuAction = MenuAction.GAME_OBJECT_FIFTH_OPTION
-            this.param0 = gameObject.sceneMinLocation.x
-            this.param1 = gameObject.sceneMinLocation.y
+            this.param0 = if (gameObject is GameObject) gameObject.sceneMinLocation.x else gameObject.localLocation.sceneX
+            this.param1 = if (gameObject is GameObject) gameObject.sceneMinLocation.y else gameObject.localLocation.sceneY
         } catch (e: Exception) {
             this.consume()
         }
@@ -104,9 +104,22 @@ class Entries {
         }
     }
 
+    fun MenuOptionClicked.click(option: Int, widget: Int) {
+        try {
+            this.menuOption = "One Click Construction"
+            this.menuTarget = ""
+            this.id = 1
+            this.menuAction = MenuAction.CC_OP
+            this.param0 = option
+            this.param1 = widget
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
     fun MenuOptionClicked.talk(option: Int, widget: Int) {
         try {
-            this.menuOption = ""
+            this.menuOption = "One Click Construction"
             this.menuTarget = ""
             this.id = 0
             this.menuAction = MenuAction.WIDGET_CONTINUE

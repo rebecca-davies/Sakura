@@ -2,8 +2,9 @@ package net.runelite.client.plugins.oneclicklavas
 
 import net.runelite.api.ItemID
 
-enum class Pouches(val pouch: String) {
-    COLOSSAL("Colossal");
+enum class Pouches(val pouch: String, val items: List<Int>) {
+    LARGE_GIANT("Large + Giant", listOf(ItemID.LARGE_POUCH, ItemID.GIANT_POUCH)),
+    COLOSSAL("Colossal", listOf(ItemID.COLOSSAL_POUCH));
 
     override fun toString(): String {
         return pouch

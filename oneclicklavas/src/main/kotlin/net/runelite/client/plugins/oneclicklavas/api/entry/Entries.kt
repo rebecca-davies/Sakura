@@ -86,7 +86,7 @@ class Entries {
             this.menuTarget = "<col=ff9040>Binding necklace</col>"
             this.id = 7
             this.menuAction = MenuAction.CC_OP_LOW_PRIORITY
-            this.param0 = 2
+            this.param0 = client.getInventoryItem(ItemID.BINDING_NECKLACE)!!.index
             this.param1 = 9764864
         } catch (e: Exception) {
             this.consume()

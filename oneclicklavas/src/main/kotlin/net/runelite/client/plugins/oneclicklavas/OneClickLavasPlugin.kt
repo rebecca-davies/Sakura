@@ -14,7 +14,6 @@ import net.runelite.client.plugins.oneclicklavas.*
 import net.runelite.client.plugins.oneclicklavas.api.entry.Entries
 import net.runelite.client.plugins.oneclicklavas.api.inventory.Inventory
 import net.runelite.client.plugins.oneclicklavas.magic.ALTAR
-import net.runelite.client.plugins.oneclicklavas.magic.BANK
 import net.runelite.client.plugins.oneclicklavas.magic.RUINS
 import net.runelite.client.plugins.oneclicklavas.util.*
 import net.runelite.client.plugins.zeahcrafter.OneClickLavasConfig
@@ -50,6 +49,9 @@ class OneClickLavasPlugin : Plugin() {
     private var energyPot = 0
     private lateinit var bankTeleport: List<Int>
     private lateinit var altarTeleport: List<Int>
+    private lateinit var pouches: List<Int>
+    private var large = false
+    private var giant = false
 
     @Provides
     fun provideConfig(configManager: ConfigManager): OneClickLavasConfig {
@@ -78,6 +80,9 @@ class OneClickLavasPlugin : Plugin() {
         energyPot = config.stamina().itemId
         bankTeleport = config.banking().items
         altarTeleport = config.altar().items
+        pouches = config.pouch().items
+        large = false
+        giant = false
     }
 
     private var items: Array<Item> by Delegates.observable(arrayOf()) { _, prev, curr ->
@@ -85,7 +90,7 @@ class OneClickLavasPlugin : Plugin() {
 
     private var state by Delegates.observable(States.OPEN_BANK) { _, prev, curr ->
         if (prev != curr) {
-            if(curr == States.FILL_POUCH) {
+            if(curr == States.FILL_COLOSSAL) {
                 attributes.computeIfPresent("fill") { _, v -> v + 1 }
             }
             process = true
@@ -110,6 +115,7 @@ class OneClickLavasPlugin : Plugin() {
         energyPot = config.stamina().itemId
         bankTeleport = config.banking().items
         altarTeleport = config.altar().items
+        pouches = config.pouch().items
     }
 
     @Subscribe
@@ -117,7 +123,7 @@ class OneClickLavasPlugin : Plugin() {
         with(inventories) {
             with(entries) {
                 checkStates()
-                    //client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "State = $state Processing = $process ${config.banking()}  ${!WidgetInfo.EQUIPMENT_RING.contains(bankTeleport)}", "")
+                //client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "State = $state Processing = $process ${config.banking()}  ${!WidgetInfo.EQUIPMENT_RING.contains(bankTeleport)}", "")
                 client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                     items = it.items
                 }
@@ -194,7 +200,23 @@ class OneClickLavasPlugin : Plugin() {
                             return
                         }
                     }
-                    States.FILL_POUCH -> {
+                    States.FILL_LARGE -> {
+
+                        client.getBankInventoryItem(ItemID.LARGE_POUCH)?.let {
+                            large = true
+                            event.clickItem(it, 9, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
+                            return
+                        }
+                    }
+                    States.FILL_GIANT -> {
+
+                        client.getBankInventoryItem(ItemID.GIANT_POUCH)?.let {
+                            giant = true
+                            event.clickItem(it, 9, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
+                            return
+                        }
+                    }
+                    States.FILL_COLOSSAL -> {
                         client.getBankInventoryItem(ItemID.COLOSSAL_POUCH)?.let {
                             event.clickItem(it, 9, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
                             return
@@ -272,6 +294,22 @@ class OneClickLavasPlugin : Plugin() {
                         }
                     }
                     States.EMPTY_POUCHES -> {
+                        if(large) {
+                            large = false
+                            client.getInventoryItem(ItemID.LARGE_POUCH)?.let {
+                                event.clickItem(it, 3, WidgetInfo.INVENTORY.id)
+                                state = States.CRAFT_RUNES
+                            }
+                            return
+                        }
+                        if(giant) {
+                            large = false
+                            client.getInventoryItem(ItemID.GIANT_POUCH)?.let {
+                                event.clickItem(it, 3, WidgetInfo.INVENTORY.id)
+                                state = States.CRAFT_RUNES
+                            }
+                            return
+                        }
                         client.getInventoryItem(ItemID.COLOSSAL_POUCH)?.let {
                             event.clickItem(it, 3, WidgetInfo.INVENTORY.id)
                             state = States.CRAFT_RUNES
@@ -290,47 +328,47 @@ class OneClickLavasPlugin : Plugin() {
 
     private fun checkStates() {
         with(inventories) {
-                if (!client.banking()) {
-                    if (!repaired && attributes["repair"] == 0) {
-                        attributes["repair"] = 1
-                        return
-                    }
-                    if (client.mapRegions.contains(13107) && state == States.ENTER_RUINS) {
-                        if (client.getInventoryItem(ItemID.BINDING_NECKLACE) != null) {
-                            state = States.DESTROY_NECKLACE
-                            return
-                        }
-                        if (client.getInventoryItem(energyPot) != null) {
-                            state = States.DRINK_STAMINA
-                            return
-                        }
-                        return
-                    }
-                    if (client.mapRegions.contains(13107) && !client.localPlayer!!.isMoving) {
-                        state = States.ENTER_RUINS
-                        return
-                    }
-                    if (attributes["emptied"]!! >= 1 && client.findGameObject("Bank chest") != null) {
-                        state = States.OPEN_BANK
-                        reset()
-                        return
-                    }
-                    if (attributes["emptied"]!! >= 1 && state == States.CRAFT_RUNES && client.localPlayer!!.animation != 714) {
-                        state = States.TELEPORT_TO_BANK
-                        return
-                    }
-                    if (client.mapRegions.contains(10315) && state != States.CRAFT_RUNES && client.getVarbitValue(5438) == 0) {
-                        state = States.CRAFT_RUNES
-                        return
-                    }
-                    if (client.mapRegions.contains(10315) && client.getVarbitValue(5438) == 0) {
-                        state = States.IMBUE
-                        return
-                    }
-                    if (state == States.TELEPORT_FROM_BANK) {
-                        return
-                    }
+            if (!client.banking()) {
+                if (!repaired && attributes["repair"] == 0) {
+                    attributes["repair"] = 1
+                    return
                 }
+                if (client.mapRegions.contains(13107) && state == States.ENTER_RUINS) {
+                    if (client.getInventoryItem(ItemID.BINDING_NECKLACE) != null) {
+                        state = States.DESTROY_NECKLACE
+                        return
+                    }
+                    if (client.getInventoryItem(energyPot) != null) {
+                        state = States.DRINK_STAMINA
+                        return
+                    }
+                    return
+                }
+                if (client.mapRegions.contains(13107) && !client.localPlayer!!.isMoving) {
+                    state = States.ENTER_RUINS
+                    return
+                }
+                if (attributes["emptied"]!! >= 1 && client.findGameObject("Bank chest") != null) {
+                    state = States.OPEN_BANK
+                    reset()
+                    return
+                }
+                if (attributes["emptied"]!! >= 1 && state == States.CRAFT_RUNES && client.localPlayer!!.animation != 714) {
+                    state = States.TELEPORT_TO_BANK
+                    return
+                }
+                if (client.mapRegions.contains(10315) && state != States.CRAFT_RUNES && client.getVarbitValue(5438) == 0) {
+                    state = States.CRAFT_RUNES
+                    return
+                }
+                if (client.mapRegions.contains(10315) && client.getVarbitValue(5438) == 0) {
+                    state = States.IMBUE
+                    return
+                }
+                if (state == States.TELEPORT_FROM_BANK) {
+                    return
+                }
+            }
 
             if (client.banking()) {
                 if (attributes["filled"] == 1 && client.getInventorySpace() <= 0) {
@@ -358,14 +396,32 @@ class OneClickLavasPlugin : Plugin() {
                     state = States.NEED_ESSENCE
                     return
                 }
-                if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) != null) {
-                    if (attributes["fill"]!! >= 2) {
+                if(config.pouch() == Pouches.LARGE_GIANT) {
+                    if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) != null) {
+                        if(!large) {
+                            state = States.FILL_LARGE
+                            return
+                        }
+                        if(!giant) {
+                            state = States.FILL_GIANT
+                            return
+                        }
                         attributes["filled"] = 1
                         state = States.NEED_ESSENCE
                         return
                     }
-                    state = States.FILL_POUCH
                     return
+                }
+                if(config.pouch() == Pouches.COLOSSAL) {
+                    if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) != null) {
+                        if (attributes["fill"]!! >= 2) {
+                            attributes["filled"] = 1
+                            state = States.NEED_ESSENCE
+                            return
+                        }
+                        state = States.FILL_COLOSSAL
+                        return
+                    }
                 }
             }
         }

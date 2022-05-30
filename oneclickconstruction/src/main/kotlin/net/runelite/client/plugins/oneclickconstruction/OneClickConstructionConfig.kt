@@ -47,10 +47,10 @@ interface OneClickConstructionConfig : Config {
         return false
     }
 
-    enum class Constructables(val type: String, val buildable: Int, val built: Int) {
-        OAK_LARDER("Oak Larder", 15403, 13566),
-        OAK_DOOR("Oak Door",15328, 13344),
-        MAHOGANY_TABLE("Mahogany table", 15298, 13298),
-        MYTH_CAPE("Mounted Myth Cape", 15394, 31986),
+    enum class Constructables(val type: String, val buildable: Int, val built: Int, val childId: Int) {
+        OAK_LARDER("Oak Larder", 15403, 13566, 5),
+        OAK_DOOR("Oak Door",15328, 13344, 4),
+        MAHOGANY_TABLE("Mahogany table", 15298, 13298, 9),
+        MYTH_CAPE("Mounted Myth Cape", 15394, 31986, 7),
     }
 }
