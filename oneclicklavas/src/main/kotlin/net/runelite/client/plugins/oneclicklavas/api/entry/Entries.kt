@@ -190,6 +190,10 @@ class Entries {
                 }
             }
         }
+        if (menuOption.equals("Walk here", ignoreCase = true)) {
+            consume()
+            return
+        }
     }
 }
 

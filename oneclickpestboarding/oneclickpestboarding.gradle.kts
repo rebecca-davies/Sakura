@@ -5,16 +5,18 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.0.4"
-project.extra["PluginName"] = "One Click Lavas" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "A one click lavas script" // This is the description that is used in the external plugin manager panel
+version = "1.0.0"
+project.extra["PluginName"] = "One Click PestBoarding" // This is the name that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "A one click PestBoarding script." // This is the description that is used in the external plugin manager panel
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
     annotationProcessor(Libraries.lombok)
     kapt(Libraries.pf4j)
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
     compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
+    compileOnly("com.openosrs.rs:runescape-api:$openosrsVersion")
+
     compileOnly(Libraries.guice)
     compileOnly(Libraries.javax)
     compileOnly(Libraries.lombok)

@@ -3,6 +3,7 @@ package net.runelite.client.plugins.oneclicklavas
 import net.runelite.api.ItemID
 
 enum class Pouches(val pouch: String, val items: List<Int>) {
+    MED_LARGE("Medium + Large", listOf(ItemID.MEDIUM_POUCH, ItemID.LARGE_POUCH)),
     LARGE_GIANT("Large + Giant", listOf(ItemID.LARGE_POUCH, ItemID.GIANT_POUCH)),
     COLOSSAL("Colossal", listOf(ItemID.COLOSSAL_POUCH));
 

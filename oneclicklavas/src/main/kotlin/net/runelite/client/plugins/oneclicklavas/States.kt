@@ -13,6 +13,7 @@ enum class States {
     EMPTY_POUCHES,
     TELEPORT_TO_BANK,
     NEED_ESSENCE,
+    FILL_MEDIUM,
     FILL_LARGE,
     FILL_GIANT,
     FILL_COLOSSAL,

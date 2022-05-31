@@ -50,6 +50,7 @@ class OneClickLavasPlugin : Plugin() {
     private lateinit var bankTeleport: List<Int>
     private lateinit var altarTeleport: List<Int>
     private lateinit var pouches: List<Int>
+    private var medium = false
     private var large = false
     private var giant = false
 
@@ -81,6 +82,7 @@ class OneClickLavasPlugin : Plugin() {
         bankTeleport = config.banking().items
         altarTeleport = config.altar().items
         pouches = config.pouch().items
+        medium = false
         large = false
         giant = false
     }
@@ -99,13 +101,10 @@ class OneClickLavasPlugin : Plugin() {
 
     @Subscribe
     fun onChatMessage(event: ChatMessage) {
-        if(event.type == ChatMessageType.GAMEMESSAGE && event.message.contains("there is no essence in this pouch", true)) {
-            attributes["emptied"] = 1
-            return
-        }
         if(event.type == ChatMessageType.GAMEMESSAGE && event.message.contains("you bind the temple", true)) {
             state = States.EMPTY_POUCHES
             attributes.computeIfPresent("charges") { _, v -> v - 1 }
+            attributes.computeIfPresent("emptied") { _, v -> v + 1 }
             return
         }
     }
@@ -123,7 +122,7 @@ class OneClickLavasPlugin : Plugin() {
         with(inventories) {
             with(entries) {
                 checkStates()
-                //client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "State = $state Processing = $process ${config.banking()}  ${!WidgetInfo.EQUIPMENT_RING.contains(bankTeleport)}", "")
+                println("state = $state ${attributes["emptied"]}")
                 client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                     items = it.items
                 }
@@ -131,7 +130,7 @@ class OneClickLavasPlugin : Plugin() {
                     event.handleMage()
                     return
                 }
-                if (!process || event.menuOption.contains("walk here", true)) {
+                if (!process) {
                     event.consume()
                 }
                 process = false
@@ -200,8 +199,14 @@ class OneClickLavasPlugin : Plugin() {
                             return
                         }
                     }
+                    States.FILL_MEDIUM -> {
+                        client.getBankInventoryItem(ItemID.MEDIUM_POUCH)?.let {
+                            medium = true
+                            event.clickItem(it, 9, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
+                            return
+                        }
+                    }
                     States.FILL_LARGE -> {
-
                         client.getBankInventoryItem(ItemID.LARGE_POUCH)?.let {
                             large = true
                             event.clickItem(it, 9, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
@@ -209,7 +214,6 @@ class OneClickLavasPlugin : Plugin() {
                         }
                     }
                     States.FILL_GIANT -> {
-
                         client.getBankInventoryItem(ItemID.GIANT_POUCH)?.let {
                             giant = true
                             event.clickItem(it, 9, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
@@ -238,6 +242,9 @@ class OneClickLavasPlugin : Plugin() {
                         return
                     }
                     States.TELEPORT_FROM_BANK -> {
+                        if(client.localPlayer.animation == -1) {
+                            process = true
+                        }
                         when (config.altar()) {
                             AltarTeleport.RING_OF_DUELING -> {
                                 altarTeleport.forEach {
@@ -294,6 +301,14 @@ class OneClickLavasPlugin : Plugin() {
                         }
                     }
                     States.EMPTY_POUCHES -> {
+                        if(medium) {
+                            medium = false
+                            client.getInventoryItem(ItemID.MEDIUM_POUCH)?.let {
+                                event.clickItem(it, 3, WidgetInfo.INVENTORY.id)
+                                state = States.CRAFT_RUNES
+                            }
+                            return
+                        }
                         if(large) {
                             large = false
                             client.getInventoryItem(ItemID.LARGE_POUCH)?.let {
@@ -329,6 +344,9 @@ class OneClickLavasPlugin : Plugin() {
     private fun checkStates() {
         with(inventories) {
             if (!client.banking()) {
+                if(state == States.EMPTY_POUCHES && attributes["emptied"]!! < 3) {
+                    return
+                }
                 if (!repaired && attributes["repair"] == 0) {
                     attributes["repair"] = 1
                     return
@@ -348,28 +366,27 @@ class OneClickLavasPlugin : Plugin() {
                     state = States.ENTER_RUINS
                     return
                 }
-                if (attributes["emptied"]!! >= 1 && client.findGameObject("Bank chest") != null) {
+                if (attributes["emptied"]!! >= 3 && client.findGameObject("Bank chest") != null) {
                     state = States.OPEN_BANK
                     reset()
                     return
                 }
-                if (attributes["emptied"]!! >= 1 && state == States.CRAFT_RUNES && client.localPlayer!!.animation != 714) {
+                if (attributes["emptied"]!! >= 3) {
                     state = States.TELEPORT_TO_BANK
-                    return
-                }
-                if (client.mapRegions.contains(10315) && state != States.CRAFT_RUNES && client.getVarbitValue(5438) == 0) {
-                    state = States.CRAFT_RUNES
                     return
                 }
                 if (client.mapRegions.contains(10315) && client.getVarbitValue(5438) == 0) {
                     state = States.IMBUE
                     return
                 }
+                if (client.mapRegions.contains(10315)) {
+                    state = States.CRAFT_RUNES
+                    return
+                }
                 if (state == States.TELEPORT_FROM_BANK) {
                     return
                 }
             }
-
             if (client.banking()) {
                 if (attributes["filled"] == 1 && client.getInventorySpace() <= 0) {
                     state = States.CLOSE_BANK
@@ -394,6 +411,22 @@ class OneClickLavasPlugin : Plugin() {
                 }
                 if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) == null) {
                     state = States.NEED_ESSENCE
+                    return
+                }
+                if(config.pouch() == Pouches.MED_LARGE) {
+                    if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) != null) {
+                        if(!medium) {
+                            state = States.FILL_MEDIUM
+                            return
+                        }
+                        if(!large) {
+                            state = States.FILL_LARGE
+                            return
+                        }
+                        attributes["filled"] = 1
+                        state = States.NEED_ESSENCE
+                        return
+                    }
                     return
                 }
                 if(config.pouch() == Pouches.LARGE_GIANT) {
