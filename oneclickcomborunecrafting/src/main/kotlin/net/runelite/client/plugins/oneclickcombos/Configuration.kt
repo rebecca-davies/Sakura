@@ -50,3 +50,13 @@ enum class RuneType(val rune: String, val runeId: Int, val comboRune: Int, val a
         return rune
     }
 }
+
+enum class Essence(val essence: String, val essenceId: Int) {
+
+    PURE_ESSENCE("Pure essence", ItemID.PURE_ESSENCE),
+    DAEYALT_ESSENCE("Daeyalt essence", ItemID.DAEYALT_ESSENCE);
+
+    override fun toString(): String {
+        return essence
+    }
+}

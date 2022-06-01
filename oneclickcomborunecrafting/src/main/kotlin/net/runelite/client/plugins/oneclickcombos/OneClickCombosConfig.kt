@@ -37,10 +37,21 @@ interface OneClickCombosConfig : Config {
     }
 
     @ConfigItem(
+        keyName = "essence",
+        name = "Essence",
+        description = "Select the essence you want to use",
+        position = 3,
+        title = "pouchConfig")
+    @JvmDefault
+    fun essence(): Essence {
+        return Essence.PURE_ESSENCE
+    }
+
+    @ConfigItem(
         keyName = "pouch",
         name = "Pouch",
         description = "Select the pouches you want to use",
-        position = 3,
+        position = 4,
         title = "pouchConfig")
     @JvmDefault
     fun pouch(): Pouches {
@@ -51,7 +62,7 @@ interface OneClickCombosConfig : Config {
         keyName = "altar",
         name = "Altar",
         description = "Select the altar teleport method",
-        position = 4,
+        position = 5,
         title = "pouchConfig")
     @JvmDefault
     fun altar(): AltarTeleport {
@@ -62,7 +73,7 @@ interface OneClickCombosConfig : Config {
         keyName = "banking",
         name = "Bank",
         description = "Select the banking teleport method",
-        position = 5,
+        position = 6,
         title = "pouchConfig")
     @JvmDefault
     fun banking(): BankTeleport {
@@ -73,7 +84,7 @@ interface OneClickCombosConfig : Config {
         keyName = "stamina",
         name = "Energy",
         description = "Select if the method of run energy restoration you'd like to use",
-        position = 6,
+        position = 7,
         title = "pouchConfig")
     @JvmDefault
     fun stamina(): RunEnergy {

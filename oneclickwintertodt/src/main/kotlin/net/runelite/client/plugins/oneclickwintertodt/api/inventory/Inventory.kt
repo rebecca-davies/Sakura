@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.oneclickwintertodt.api.inventory
 
 import net.runelite.api.Client
+import net.runelite.api.InventoryID
 import net.runelite.api.widgets.Widget
 import net.runelite.api.widgets.WidgetInfo
 import javax.inject.Inject
@@ -40,6 +41,18 @@ class Inventory {
     }
 
     fun WidgetInfo.wearing(id: Int): Boolean {
+        return this.contains(id)
+    }
+
+    fun InventoryID.contains(id: List<Any>): Boolean {
+        return client.getItemContainer(this)?.items?.map { it.id }?.any(id::contains)!!
+    }
+
+    fun InventoryID.contains(id: Int): Boolean {
+        return client.getItemContainer(this)?.items?.map { it.id }?.contains(id)!!
+    }
+
+    fun InventoryID.wearing(id: Int): Boolean {
         return this.contains(id)
     }
 }

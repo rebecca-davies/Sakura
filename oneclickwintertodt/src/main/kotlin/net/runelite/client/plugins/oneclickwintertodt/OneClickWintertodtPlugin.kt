@@ -2,11 +2,9 @@ package net.runelite.client
 
 import com.google.inject.Provides
 import net.runelite.api.*
-import net.runelite.api.events.ChatMessage
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
-import net.runelite.api.widgets.WidgetInfo
 import net.runelite.api.widgets.WidgetInfo.LEVEL_UP_CONTINUE
 import net.runelite.api.widgets.WidgetInfo.BANK_ITEM_CONTAINER as bank
 import net.runelite.api.widgets.WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER as bankInventory
@@ -26,7 +24,7 @@ import net.runelite.client.plugins.oneclickwintertodt.client.*
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
-import net.runelite.api.widgets.WidgetInfo.EQUIPMENT_WEAPON as equipment
+import net.runelite.api.InventoryID.EQUIPMENT as equipment
 
 @Extension
 @PluginDescriptor(

@@ -197,7 +197,7 @@ class OneClickCombosPlugin : Plugin() {
                         }
                     }
                     States.NEED_ESSENCE -> {
-                        client.getBankItem(ItemID.PURE_ESSENCE)?.let {
+                        client.getBankItem(config.essence().essenceId)?.let {
                             event.clickItem(it, 1, WidgetInfo.BANK_ITEM_CONTAINER.id)
                             return
                         }
@@ -417,12 +417,12 @@ class OneClickCombosPlugin : Plugin() {
                     state = States.NEED_STAMINA
                     return
                 }
-                if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) == null) {
+                if (client.getBankInventoryItem(config.essence().essenceId) == null) {
                     state = States.NEED_ESSENCE
                     return
                 }
                 if(config.pouch() == Pouches.MED_LARGE) {
-                    if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) != null) {
+                    if (client.getBankInventoryItem(config.essence().essenceId) != null) {
                         if(!medium) {
                             state = States.FILL_MEDIUM
                             return
@@ -438,7 +438,7 @@ class OneClickCombosPlugin : Plugin() {
                     return
                 }
                 if(config.pouch() == Pouches.LARGE_GIANT) {
-                    if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) != null) {
+                    if (client.getBankInventoryItem(config.essence().essenceId) != null) {
                         if(!large) {
                             state = States.FILL_LARGE
                             return
@@ -454,7 +454,7 @@ class OneClickCombosPlugin : Plugin() {
                     return
                 }
                 if(config.pouch() == Pouches.COLOSSAL) {
-                    if (client.getBankInventoryItem(ItemID.PURE_ESSENCE) != null) {
+                    if (client.getBankInventoryItem(config.essence().essenceId) != null) {
                         if (attributes["fill"]!! >= 2) {
                             attributes["filled"] = 1
                             state = States.NEED_ESSENCE
