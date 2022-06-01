@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclicklavas.api.inventory
+package net.runelite.client.plugins.oneclickcombos.api.inventory
 
 import net.runelite.api.Client
 import net.runelite.api.InventoryID

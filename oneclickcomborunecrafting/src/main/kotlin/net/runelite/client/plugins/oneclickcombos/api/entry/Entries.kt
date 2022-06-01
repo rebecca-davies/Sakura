@@ -1,10 +1,10 @@
-package net.runelite.client.plugins.oneclicklavas.api.entry
+package net.runelite.client.plugins.oneclickcombos.api.entry
 
 import net.runelite.api.*
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.widgets.Widget
-import net.runelite.client.OneClickLavasPlugin
-import net.runelite.client.plugins.oneclicklavas.client.getInventoryItem
+import net.runelite.client.OneClickCombosPlugin
+import net.runelite.client.plugins.oneclickcombos.client.getInventoryItem
 import javax.inject.Inject
 
 class Entries {
@@ -13,7 +13,7 @@ class Entries {
     lateinit var client: Client
 
     @Inject
-    lateinit var plugin: OneClickLavasPlugin
+    lateinit var plugin: OneClickCombosPlugin
 
     fun MenuOptionClicked.clickItem(item: Widget, action: Int, container: Int) {
         try {

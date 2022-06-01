@@ -10,26 +10,26 @@ import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.ConfigChanged
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
-import net.runelite.client.plugins.oneclicklavas.*
-import net.runelite.client.plugins.oneclicklavas.api.entry.Entries
-import net.runelite.client.plugins.oneclicklavas.api.inventory.Inventory
-import net.runelite.client.plugins.oneclicklavas.client.*
-import net.runelite.client.plugins.oneclicklavas.util.*
-import net.runelite.client.plugins.zeahcrafter.OneClickLavasConfig
+import net.runelite.client.plugins.oneclickcombos.*
+import net.runelite.client.plugins.oneclickcombos.api.entry.Entries
+import net.runelite.client.plugins.oneclickcombos.api.inventory.Inventory
+import net.runelite.client.plugins.oneclickcombos.client.*
+import net.runelite.client.plugins.oneclickcombos.util.*
+import net.runelite.client.plugins.zeahcrafter.OneClickCombosConfig
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
 @Extension
 @PluginDescriptor(
-    name = "One Click Lavas",
+    name = "One Click Combo Runecrafting",
     description = ":Prayje:",
-    tags = ["rebecca, oneclick, one click, lavas"]
+    tags = ["rebecca", "one click", "combo", "runecrafting"]
 )
-class OneClickLavasPlugin : Plugin() {
+class OneClickCombosPlugin : Plugin() {
 
     @Inject
-    lateinit var config: OneClickLavasConfig
+    lateinit var config: OneClickCombosConfig
 
     @Inject
     lateinit var client: Client
@@ -56,8 +56,8 @@ class OneClickLavasPlugin : Plugin() {
     private var giant = false
 
     @Provides
-    fun provideConfig(configManager: ConfigManager): OneClickLavasConfig {
-        return configManager.getConfig(OneClickLavasConfig::class.java)
+    fun provideConfig(configManager: ConfigManager): OneClickCombosConfig {
+        return configManager.getConfig(OneClickCombosConfig::class.java)
     }
 
     override fun startUp() {

@@ -5,8 +5,8 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.0.6"
-project.extra["PluginName"] = "One Click Lavas" // This is the name that is used in the external plugin manager panel
+version = "1.0.8"
+project.extra["PluginName"] = "One Click Combo Runecrafting" // This is the name that is used in the external plugin manager panel
 project.extra["PluginDescription"] = "A one click lavas script" // This is the description that is used in the external plugin manager panel
 
 dependencies {

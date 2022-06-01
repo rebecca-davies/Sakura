@@ -24,7 +24,7 @@
  */
 
 rootProject.name = "Externals"
-include(":oneclicklavas")
+include(":oneclickcomborunecrafting")
 include(":oneclickwintertodt")
 include(":oneclickconstruction")
 for (project in rootProject.children) {
