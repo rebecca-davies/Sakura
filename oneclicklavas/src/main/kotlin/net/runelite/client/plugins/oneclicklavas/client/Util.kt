@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.oneclicklavas
+package net.runelite.client.plugins.oneclicklavas.client
 
 import net.runelite.api.Client
 import net.runelite.api.GameObject

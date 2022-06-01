@@ -4,7 +4,7 @@ import net.runelite.api.*
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.widgets.Widget
 import net.runelite.client.OneClickLavasPlugin
-import net.runelite.client.plugins.oneclicklavas.getInventoryItem
+import net.runelite.client.plugins.oneclicklavas.client.getInventoryItem
 import javax.inject.Inject
 
 class Entries {
@@ -106,9 +106,9 @@ class Entries {
         }
     }
 
-    fun MenuOptionClicked.useOn(gameObject: GameObject) {
+    fun MenuOptionClicked.useOn(item: Int, gameObject: GameObject) {
         try {
-            client.getInventoryItem(ItemID.EARTH_RUNE)?.let {
+            client.getInventoryItem(item)?.let {
                 client.selectedSpellWidget = it.id
                 client.selectedSpellChildIndex = it.index
                 client.selectedSpellItemId = it.itemId
