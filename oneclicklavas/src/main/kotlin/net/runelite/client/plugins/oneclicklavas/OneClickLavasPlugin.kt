@@ -13,8 +13,7 @@ import net.runelite.client.plugins.PluginDescriptor
 import net.runelite.client.plugins.oneclicklavas.*
 import net.runelite.client.plugins.oneclicklavas.api.entry.Entries
 import net.runelite.client.plugins.oneclicklavas.api.inventory.Inventory
-import net.runelite.client.plugins.oneclicklavas.magic.ALTAR
-import net.runelite.client.plugins.oneclicklavas.magic.RUINS
+import net.runelite.client.plugins.oneclicklavas.client.*
 import net.runelite.client.plugins.oneclicklavas.util.*
 import net.runelite.client.plugins.zeahcrafter.OneClickLavasConfig
 import org.pf4j.Extension
@@ -47,6 +46,8 @@ class OneClickLavasPlugin : Plugin() {
     private var process = true
     var repaired = false
     private var energyPot = 0
+    private var productRune = 0
+    private var requiredRune = 0
     private lateinit var bankTeleport: List<Int>
     private lateinit var altarTeleport: List<Int>
     private lateinit var pouches: List<Int>
@@ -79,6 +80,8 @@ class OneClickLavasPlugin : Plugin() {
         process = true
         state = States.OPEN_BANK
         energyPot = config.stamina().itemId
+        productRune = config.rune().runeId
+        requiredRune = config.rune().comboRune
         bankTeleport = config.banking().items
         altarTeleport = config.altar().items
         pouches = config.pouch().items
@@ -136,8 +139,8 @@ class OneClickLavasPlugin : Plugin() {
                 process = false
 
                 val bank = client.findGameObject("Bank chest")
-                val ruin = client.findGameObject(RUINS)
-                val altar = client.findGameObject(ALTAR)
+                val ruin = client.findGameObject(config.rune().ruinsId)
+                val altar = client.findGameObject(config.rune().altarId)
 
                 when (state) {
                     States.TELEPORT_TO_BANK -> {
@@ -162,7 +165,7 @@ class OneClickLavasPlugin : Plugin() {
                         }
                     }
                     States.NEED_DEPOSIT -> {
-                        client.getBankInventoryItem(ItemID.LAVA_RUNE)?.let {
+                        client.getBankInventoryItem(productRune)?.let {
                             event.clickItem(it, 2, WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.id)
                             return
                         }
@@ -297,7 +300,7 @@ class OneClickLavasPlugin : Plugin() {
                     }
                     States.CRAFT_RUNES -> {
                         altar?.let {
-                            event.useOn(it)
+                            event.useOn(requiredRune, it)
                         }
                     }
                     States.EMPTY_POUCHES -> {
@@ -392,7 +395,7 @@ class OneClickLavasPlugin : Plugin() {
                     state = States.CLOSE_BANK
                     return
                 }
-                if (client.getBankInventoryItem(ItemID.LAVA_RUNE) != null) {
+                if (client.getBankInventoryItem(productRune) != null) {
                     state = States.NEED_DEPOSIT
                     return
                 }

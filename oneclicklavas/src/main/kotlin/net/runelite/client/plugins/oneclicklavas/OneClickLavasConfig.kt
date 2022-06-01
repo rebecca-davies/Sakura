@@ -26,10 +26,21 @@ interface OneClickLavasConfig : Config {
         return "Configure your settings to suit your seeds, currently only supports colossal pouches, make sure your run energy potions are decanted into one doses with barbarian vial smashing enabled."
     }
     @ConfigItem(
+        keyName = "rune",
+        name = "Rune",
+        description = "Select the rune you want to craft",
+        position = 2,
+        title = "pouchConfig")
+    @JvmDefault
+    fun rune(): RuneType {
+        return RuneType.LAVA
+    }
+
+    @ConfigItem(
         keyName = "pouch",
         name = "Pouch",
         description = "Select the pouches you want to use",
-        position = 2,
+        position = 3,
         title = "pouchConfig")
     @JvmDefault
     fun pouch(): Pouches {
@@ -40,7 +51,7 @@ interface OneClickLavasConfig : Config {
         keyName = "altar",
         name = "Altar",
         description = "Select the altar teleport method",
-        position = 3,
+        position = 4,
         title = "pouchConfig")
     @JvmDefault
     fun altar(): AltarTeleport {
@@ -51,7 +62,7 @@ interface OneClickLavasConfig : Config {
         keyName = "banking",
         name = "Bank",
         description = "Select the banking teleport method",
-        position = 4,
+        position = 5,
         title = "pouchConfig")
     @JvmDefault
     fun banking(): BankTeleport {
@@ -62,7 +73,7 @@ interface OneClickLavasConfig : Config {
         keyName = "stamina",
         name = "Energy",
         description = "Select if the method of run energy restoration you'd like to use",
-        position = 5,
+        position = 6,
         title = "pouchConfig")
     @JvmDefault
     fun stamina(): RunEnergy {
