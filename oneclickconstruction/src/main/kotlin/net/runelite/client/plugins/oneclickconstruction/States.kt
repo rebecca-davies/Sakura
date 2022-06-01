@@ -5,5 +5,8 @@ enum class States {
     BUILD,
     REMOVE,
     PRESS_BUILD,
-    CONFIRM_REMOVE
+    CONFIRM_REMOVE,
+    CALL_BUTLER,
+    USE_BUTLER,
+    
 }

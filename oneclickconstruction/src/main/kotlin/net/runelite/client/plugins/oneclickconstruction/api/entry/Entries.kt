@@ -119,7 +119,7 @@ class Entries {
 
     fun MenuOptionClicked.talk(option: Int, widget: Int) {
         try {
-            this.menuOption = "One Click Construction"
+            this.menuOption = "Continue"
             this.menuTarget = ""
             this.id = 0
             this.menuAction = MenuAction.WIDGET_CONTINUE
@@ -130,7 +130,7 @@ class Entries {
         }
     }
 
-    fun MenuOptionClicked.trade(npc: NPC, action: MenuAction) {
+    fun MenuOptionClicked.talkTo(npc: NPC, action: MenuAction) {
         try {
             this.menuOption = ""
             this.menuTarget = ""

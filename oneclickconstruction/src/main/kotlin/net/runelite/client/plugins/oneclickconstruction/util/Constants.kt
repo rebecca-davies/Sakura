@@ -7,5 +7,5 @@ import net.runelite.api.coords.WorldPoint
 import net.runelite.api.widgets.WidgetID
 import net.runelite.api.widgets.WidgetInfo
 
-
+var BUTLERS = listOf(221, 223, 227, 229)
 
