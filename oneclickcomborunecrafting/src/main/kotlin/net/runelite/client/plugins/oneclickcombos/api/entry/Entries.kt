@@ -17,7 +17,7 @@ class Entries {
 
     fun MenuOptionClicked.clickItem(item: Widget, action: Int, container: Int) {
         try {
-            this.menuOption = "One Click Lavas"
+            this.menuOption = "One Click Combo Runecrafting"
             this.menuTarget = ""
             this.id = action
             this.menuAction = if (action < 6) MenuAction.CC_OP else MenuAction.CC_OP_LOW_PRIORITY
@@ -30,7 +30,7 @@ class Entries {
 
     fun MenuOptionClicked.closeBank() {
         try {
-            this.menuOption = "One Click Lavas"
+            this.menuOption = "One Click Combo Runecrafting"
             this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
@@ -43,7 +43,7 @@ class Entries {
 
     fun MenuOptionClicked.teleport(action: Int, container: Int) {
         try {
-            this.menuOption = "One Click Lavas"
+            this.menuOption = "One Click Combo Runecrafting"
             this.menuTarget = ""
             this.id = action
             this.menuAction = if (action < 6) MenuAction.CC_OP else MenuAction.CC_OP_LOW_PRIORITY
@@ -56,7 +56,7 @@ class Entries {
 
     fun MenuOptionClicked.imbue() {
         try {
-            this.menuOption = "One Click Lavas"
+            this.menuOption = "One Click Combo Runecrafting"
             this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
@@ -69,7 +69,7 @@ class Entries {
 
     fun MenuOptionClicked.use(gameObject: GameObject) {
         try {
-            this.menuOption = "One Click Lavas"
+            this.menuOption = "One Click Combo Runecrafting"
             this.menuTarget = ""
             this.id = gameObject.id
             this.menuAction = MenuAction.GAME_OBJECT_FIRST_OPTION
@@ -112,7 +112,7 @@ class Entries {
                 client.selectedSpellWidget = it.id
                 client.selectedSpellChildIndex = it.index
                 client.selectedSpellItemId = it.itemId
-                this.menuOption = "One Click Lavas"
+                this.menuOption = "One Click Combo Runecrafting"
                 this.menuTarget = ""
                 this.id = gameObject.id
                 this.menuAction = MenuAction.WIDGET_TARGET_ON_GAME_OBJECT
@@ -126,7 +126,7 @@ class Entries {
 
     private fun MenuOptionClicked.repair() {
         try {
-            this.menuOption = "One Click Lavas"
+            this.menuOption = "One Click Combo Runecrafting"
             this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
@@ -139,7 +139,7 @@ class Entries {
 
     private fun MenuOptionClicked.mage() {
         try {
-            this.menuOption = "One Click Lavas"
+            this.menuOption = "One Click Combo Runecrafting"
             this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
@@ -152,7 +152,7 @@ class Entries {
 
     private fun MenuOptionClicked.talk(param0: Int, param1: Int) {
         try {
-            this.menuOption = "One Click Lavas"
+            this.menuOption = "One Click Combo Runecrafting"
             this.menuTarget = ""
             this.id = 0
             this.menuAction = MenuAction.WIDGET_CONTINUE

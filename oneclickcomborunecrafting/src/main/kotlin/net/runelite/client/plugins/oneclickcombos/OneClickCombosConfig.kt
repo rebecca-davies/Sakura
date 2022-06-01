@@ -3,14 +3,14 @@ package net.runelite.client.plugins.zeahcrafter
 import net.runelite.client.config.*
 import net.runelite.client.plugins.oneclickcombos.*
 
-@ConfigGroup("OneClickLavas")
+@ConfigGroup("oneclickcombos")
 interface OneClickCombosConfig : Config {
 
     companion object {
         @JvmField
         @ConfigTitle(
             keyName = "pouchConfig",
-            name = "OneClickLavas",
+            name = "OneClickCombos",
             description = "Configure your plugins settings to suit your needs",
             position = 0)
         val pouchConfig: String = "pouchConfig"
@@ -23,7 +23,7 @@ interface OneClickCombosConfig : Config {
         title = "pouchConfig")
     @JvmDefault
     fun text(): String {
-        return "Configure your settings to suit your seeds, currently only supports colossal pouches, make sure your run energy potions are decanted into one doses with barbarian vial smashing enabled."
+        return "Configure your settings to suit your needs, make sure your run energy potions are decanted into one doses with barbarian vial smashing enabled. If you get stuck, please check out the discord help section."
     }
     @ConfigItem(
         keyName = "rune",

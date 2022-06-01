@@ -61,7 +61,7 @@ class OneClickCombosPlugin : Plugin() {
     }
 
     override fun startUp() {
-        log.info("Starting One click lavas")
+        log.info("Starting One click combo runecrafting")
         attributes["charges"] = 0
         attributes["repair"] = 0
         repaired = true
@@ -69,7 +69,7 @@ class OneClickCombosPlugin : Plugin() {
     }
 
     override fun shutDown() {
-        log.info("Stopping One click lavas")
+        log.info("Stopping One combo runecrafting")
     }
 
     private fun reset() {
