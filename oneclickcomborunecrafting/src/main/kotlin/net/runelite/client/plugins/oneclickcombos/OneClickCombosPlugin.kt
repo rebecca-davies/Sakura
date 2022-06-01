@@ -104,7 +104,7 @@ class OneClickCombosPlugin : Plugin() {
 
     @Subscribe
     fun onChatMessage(event: ChatMessage) {
-        if(event.type == ChatMessageType.GAMEMESSAGE && event.message.contains("you bind the temple", true)) {
+        if(event.type == ChatMessageType.GAMEMESSAGE && event.message.contains("bind the temple", true)) {
             state = States.EMPTY_POUCHES
             attributes.computeIfPresent("charges") { _, v -> v - 1 }
             attributes.computeIfPresent("emptied") { _, v -> v + 1 }
