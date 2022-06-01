@@ -250,6 +250,11 @@ class OneClickLavasPlugin : Plugin() {
                         }
                         when (config.altar()) {
                             AltarTeleport.RING_OF_DUELING -> {
+                                if(productRune == ItemID.MUD_RUNE){
+                                    client.addChatMessage(ChatMessageType.GAMEMESSAGE, "Warning", "Please use the ring of elements.", "Warning")
+                                    event.consume()
+                                    return;
+                                }
                                 altarTeleport.forEach {
                                     if (InventoryID.EQUIPMENT.wearing(it)) {
                                         event.teleport(2, 25362456)
@@ -261,7 +266,7 @@ class OneClickLavasPlugin : Plugin() {
                             AltarTeleport.RING_OF_THE_ELEMENTS -> {
                                 altarTeleport.forEach {
                                     if (InventoryID.EQUIPMENT.wearing(it)) {
-                                        event.teleport(6, 25362456)
+                                        event.teleport(config.rune().actionId, 25362456)
                                         return
                                     }
                                 }
@@ -354,7 +359,7 @@ class OneClickLavasPlugin : Plugin() {
                     attributes["repair"] = 1
                     return
                 }
-                if (client.mapRegions.contains(13107) && state == States.ENTER_RUINS) {
+                if (config.rune().outsideId.contains(client.localPlayer.worldLocation.regionID) && state == States.ENTER_RUINS) {
                     if (client.getInventoryItem(ItemID.BINDING_NECKLACE) != null) {
                         state = States.DESTROY_NECKLACE
                         return
@@ -365,7 +370,7 @@ class OneClickLavasPlugin : Plugin() {
                     }
                     return
                 }
-                if (client.mapRegions.contains(13107) && !client.localPlayer!!.isMoving) {
+                if (config.rune().outsideId.contains(client.localPlayer.worldLocation.regionID) && !client.localPlayer!!.isMoving) {
                     state = States.ENTER_RUINS
                     return
                 }
@@ -378,11 +383,11 @@ class OneClickLavasPlugin : Plugin() {
                     state = States.TELEPORT_TO_BANK
                     return
                 }
-                if (client.mapRegions.contains(10315) && client.getVarbitValue(5438) == 0) {
+                if (client.mapRegions.contains(config.rune().insideId) && client.getVarbitValue(5438) == 0) {
                     state = States.IMBUE
                     return
                 }
-                if (client.mapRegions.contains(10315)) {
+                if (client.mapRegions.contains(config.rune().insideId)) {
                     state = States.CRAFT_RUNES
                     return
                 }

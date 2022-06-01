@@ -41,9 +41,10 @@ enum class RunEnergy(val potion: String, val itemId: Int) {
     }
 }
 
-enum class RuneType(val rune: String, val runeId: Int, val comboRune: Int, val ruinsId: Int, val altarId: Int, val insideId: Int, val outsideId: IntArray) {
-    LAVA("Lava Rune", ItemID.LAVA_RUNE, ItemID.EARTH_RUNE, 34817, 34764, 10315, intArrayOf(13106, 13107)),
-    STEAM("Steam Rune", ItemID.STEAM_RUNE, ItemID.WATER_RUNE, 34817, 34764, 10315, intArrayOf(13106, 13107));
+enum class RuneType(val rune: String, val runeId: Int, val comboRune: Int, val actionId: Int, val ruinsId: Int, val altarId: Int, val insideId: Int, val outsideId: IntArray) {
+    LAVA("Lava Rune", ItemID.LAVA_RUNE, ItemID.EARTH_RUNE,6, 34817, 34764, 10315, intArrayOf(13106, 13107)),
+    STEAM("Steam Rune", ItemID.STEAM_RUNE, ItemID.WATER_RUNE,6,  34817, 34764, 10315, intArrayOf(13106, 13107)),
+    MUD("Mud Rune", ItemID.MUD_RUNE, ItemID.EARTH_RUNE, 4, 34815, 34762,10827, intArrayOf(12593, 12954));
 
     override fun toString(): String {
         return rune
