@@ -69,4 +69,15 @@ interface AnonymizerConfig : Config {
         return false
     }
 
+    @ConfigItem(
+        position = 7,
+        keyName = "hideStats",
+        name = "Hide Stats",
+        description = "Hides account stats in various interfaces",
+    )
+    @JvmDefault
+    fun hideStats(): Boolean {
+        return false
+    }
+
 }

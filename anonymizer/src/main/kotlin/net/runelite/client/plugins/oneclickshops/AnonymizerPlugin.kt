@@ -3,6 +3,7 @@ package net.runelite.client
 import com.google.inject.Provides
 import net.runelite.api.*
 import net.runelite.api.events.BeforeRender
+import net.runelite.api.events.WidgetLoaded
 import net.runelite.api.widgets.ItemQuantityMode
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.callback.ClientThread
@@ -38,6 +39,8 @@ class AnonymizerPlugin : Plugin() {
 
     companion object : Log()
 
+    var needRefresh = false
+
     @Provides
     fun provideConfig(configManager: ConfigManager): AnonymizerConfig {
         return configManager.getConfig(AnonymizerConfig::class.java)
@@ -59,6 +62,24 @@ class AnonymizerPlugin : Plugin() {
                 client.getWidget(122, 11)?.isHidden = true
             }
         }
+        when(config.hideStats()) {
+            true -> {
+                client.getWidget(712,2)?.getChild(88)?.text = "<col=0dc10d>--/1395</col>"
+                client.getWidget(712,2)?.getChild(75)?.text = "<col=0dc10d>--/400</col>"
+                client.getWidget(712,2)?.getChild(62)?.text = "<col=0dc10d>--/492</col>"
+                client.getWidget(712,2)?.getChild(49)?.text = "<col=0dc10d>--/153</col>"
+                client.getWidget(712,2)?.getChild(36)?.text = "Total XP: <col=0dc10d>--</col>"
+                client.getWidget(712,2)?.getChild(24)?.text = "<col=0dc10d>--</col>"
+                client.getWidget(712,2)?.getChild(11)?.text = "<col=0dc10d>--</col>"
+                client.getWidget(712,2)?.getChild(88)?.width = 200
+                client.getWidget(712,2)?.getChild(75)?.width = 200
+                client.getWidget(712,2)?.getChild(62)?.width = 200
+                client.getWidget(712,2)?.getChild(49)?.width = 200
+                client.getWidget(712,2)?.getChild(36)?.width = 200
+                client.getWidget(712,2)?.getChild(24)?.width = 200
+                client.getWidget(712,2)?.getChild(11)?.width = 200
+            }
+        }
         when(config.hideOrbs()) {
             true -> {
                 client.getWidget(160, 5)?.text = "--"
@@ -70,7 +91,18 @@ class AnonymizerPlugin : Plugin() {
         when(config.username().isNotEmpty()) {
             true -> {
                 val txt = client.getWidget(162, 55)?.text?.split(":")
-                client.getWidget(162, 55)?.text = config.username() + ":" + (txt?.get(1) ?: "")
+                client.getWidget(162, 55)?.text = "${config.username()}:${(txt?.get(1) ?: "")}"
+                client.getWidget(712, 1)?.text = config.username()
+                client.getWidget(217, 4)?.text = config.username()
+                needRefresh = true
+            }
+            false -> {
+                if(needRefresh) {
+                    clientThread.invoke(Runnable {
+                        client.runScript(ScriptID.CHAT_PROMPT_INIT)
+                        needRefresh = false
+                    })
+                }
             }
         }
         when(config.hideAmounts()) {
@@ -88,6 +120,11 @@ class AnonymizerPlugin : Plugin() {
     }
 
     @Subscribe
+    fun onWidgetLoaded(event: WidgetLoaded) {
+        println(event.groupId)
+    }
+
+    @Subscribe
     fun onConfigChanged(event: ConfigChanged) {
         when(config.hideXp()) {
             false -> {
@@ -100,12 +137,6 @@ class AnonymizerPlugin : Plugin() {
                 client.getWidget(160, 16)?.text = client.getBoostedSkillLevel(Skill.PRAYER).toString()
                 client.getWidget(WidgetInfo.MINIMAP_RUN_ORB_TEXT)?.text = client.energy.toString()
                 client.getWidget(160,32)?.text = (client.getVar(VarPlayer.SPECIAL_ATTACK_PERCENT) / 10).toString()
-            }
-        }
-        when(config.username().isEmpty()) {
-            true -> {
-                val txt = client.getWidget(162, 55)?.text?.split(":")
-                client.getWidget(162, 55)?.text = client.localPlayer.name + ":" + (txt?.get(1) ?: "")
             }
         }
         when(config.hideAmounts()) {

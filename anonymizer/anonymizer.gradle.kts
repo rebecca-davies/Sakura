@@ -5,7 +5,7 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.0.0"
+version = "1.0.1"
 project.extra["PluginName"] = "Sakura Anon" // This is the name that is used in the external plugin manager panel
 project.extra["PluginDescription"] = "An all-in-one anonymous utility." // This is the description that is used in the external plugin manager panel
 
