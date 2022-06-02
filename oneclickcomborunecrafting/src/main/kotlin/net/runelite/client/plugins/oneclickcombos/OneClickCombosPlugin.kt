@@ -370,7 +370,7 @@ class OneClickCombosPlugin : Plugin() {
                     attributes["repair"] = 1
                     return
                 }
-                if (config.rune().outsideId.contains(client.localPlayer.worldLocation.regionID) && state == States.ENTER_RUINS) {
+                if (client.mapRegions.contains(config.rune().outsideId) && state == States.ENTER_RUINS) {
                     if (client.getInventoryItem(ItemID.BINDING_NECKLACE) != null) {
                         state = States.DESTROY_NECKLACE
                         return
@@ -381,7 +381,7 @@ class OneClickCombosPlugin : Plugin() {
                     }
                     return
                 }
-                if (config.rune().outsideId.contains(client.localPlayer.worldLocation.regionID) && !client.localPlayer!!.isMoving) {
+                if (client.mapRegions.contains(config.rune().outsideId) && !client.localPlayer!!.isMoving) {
                     state = States.ENTER_RUINS
                     return
                 }
