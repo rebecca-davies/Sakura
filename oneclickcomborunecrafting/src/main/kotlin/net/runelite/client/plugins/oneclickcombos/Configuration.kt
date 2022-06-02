@@ -22,6 +22,7 @@ enum class AltarTeleport(val ring: String, val items: List<Int>) {
 }
 
 enum class BankTeleport(val method: String, val items: List<Int>) {
+    MAX_CAPE("Max cape", listOf(13342)),
     CRAFTING_CAPE("Crafting cape", listOf(ItemID.CRAFTING_CAPE, ItemID.CRAFTING_CAPET)),
     RING_OF_DUELING("Ring of dueling", listOf(ItemID.RING_OF_DUELING1, ItemID.RING_OF_DUELING2, ItemID.RING_OF_DUELING3, ItemID.RING_OF_DUELING4, ItemID.RING_OF_DUELING5, ItemID.RING_OF_DUELING6, ItemID.RING_OF_DUELING7, ItemID.RING_OF_DUELING8));
 

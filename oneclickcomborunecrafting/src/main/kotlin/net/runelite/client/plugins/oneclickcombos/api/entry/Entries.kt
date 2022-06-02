@@ -41,10 +41,10 @@ class Entries {
         }
     }
 
-    fun MenuOptionClicked.teleport(action: Int, container: Int) {
+    fun MenuOptionClicked.teleport(action: Int, container: Int, op: String = "One Click Combo Runecrafting", targ: String = "") {
         try {
-            this.menuOption = "One Click Combo Runecrafting"
-            this.menuTarget = ""
+            this.menuOption = op
+            this.menuTarget = targ
             this.id = action
             this.menuAction = if (action < 6) MenuAction.CC_OP else MenuAction.CC_OP_LOW_PRIORITY
             this.param0 = -1

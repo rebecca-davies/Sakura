@@ -125,11 +125,11 @@ class OneClickCombosPlugin : Plugin() {
         with(inventories) {
             with(entries) {
                 checkStates()
-                println("state = $state ${attributes["emptied"]}")
+                log.info("state = $state, process = $process. ${attributes["emptied"]}, ${config.banking().method}")
                 client.getItemContainer(InventoryID.INVENTORY.id)?.let {
                     items = it.items
                 }
-                if (attributes["repair"]!! >= 1) {
+                if (attributes["repair"]!! >= 1 && config.banking() != BankTeleport.MAX_CAPE) {
                     event.handleMage()
                     return
                 }
@@ -145,6 +145,14 @@ class OneClickCombosPlugin : Plugin() {
                 when (state) {
                     States.TELEPORT_TO_BANK -> {
                         when (config.banking()) {
+                            BankTeleport.MAX_CAPE -> {
+                                bankTeleport.forEach {
+                                    if (InventoryID.EQUIPMENT.wearing(it)) {
+                                        event.teleport(4, 25362448)
+                                        return
+                                    }
+                                }
+                            }
                             BankTeleport.CRAFTING_CAPE -> {
                                 bankTeleport.forEach {
                                     if (InventoryID.EQUIPMENT.wearing(it)) {
@@ -152,7 +160,6 @@ class OneClickCombosPlugin : Plugin() {
                                         return
                                     }
                                 }
-
                             }
                             BankTeleport.RING_OF_DUELING -> {
                                 bankTeleport.forEach {
@@ -265,6 +272,10 @@ class OneClickCombosPlugin : Plugin() {
                             }
                             AltarTeleport.RING_OF_THE_ELEMENTS -> {
                                 altarTeleport.forEach {
+                                    if(InventoryID.INVENTORY.contains(it)){
+                                        event.clickItem(client.getInventoryItem(it)!!, 6, WidgetInfo.INVENTORY.id)
+                                        return
+                                    }
                                     if (InventoryID.EQUIPMENT.wearing(it)) {
                                         event.teleport(config.rune().actionId, 25362456)
                                         return
@@ -355,7 +366,7 @@ class OneClickCombosPlugin : Plugin() {
                 if(state == States.EMPTY_POUCHES && attributes["emptied"]!! < 3) {
                     return
                 }
-                if (!repaired && attributes["repair"] == 0) {
+                if (!repaired && attributes["repair"] == 0 && config.banking() != BankTeleport.MAX_CAPE) {
                     attributes["repair"] = 1
                     return
                 }
