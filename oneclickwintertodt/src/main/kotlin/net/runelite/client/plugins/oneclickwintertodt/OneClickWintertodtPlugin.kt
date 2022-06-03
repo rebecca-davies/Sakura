@@ -332,7 +332,7 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                     States.IDLE -> {}
                     States.SAFE, States.WAIT_TO_LEAVE -> {
-                       event.walkTo(WorldPoint(1630, 3974, 0))
+                        event.walkTo(WorldPoint(1630, 3974, 0))
                         return
                     }
                 }
@@ -481,19 +481,16 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.PICK_HERB
                         return
                     }
-                    if(client.getWidget(396, 21)?.text?.filter { it.isDigit() }?.toInt()!! < 13) {
-                        if(inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) {
+                    if(client.getWidget(396, 21)?.text?.filter { it.isDigit() }?.toInt()!! < 7) {
+                        if(inventory.quantity(ItemID.BRUMA_ROOT) > 8 && litBrazier != null) {
                             state = States.FIREMAKING
                             return
                         }
-                        if(state == States.FLETCHING && inventory.contains(ItemID.BRUMA_ROOT)) {
+                        if(state == States.FIREMAKING && inventory.contains(ItemID.BRUMA_ROOT)) {
                             return
                         }
-                        if(inventory.quantity(ItemID.BRUMA_ROOT) > 5) {
-                            state = States.FLETCHING
-                            return
-                        }
-
+                        state = States.WOODCUTTING
+                        return
                     }
                     if (fletch && inventory.contains(ItemID.BRUMA_ROOT) && (inventory.freeSpace() <= 0 || (inventory.quantity(ItemID.BRUMA_ROOT) + inventory.quantity(ItemID.BRUMA_KINDLING)) >= 10)) {
                         state = States.FLETCHING
