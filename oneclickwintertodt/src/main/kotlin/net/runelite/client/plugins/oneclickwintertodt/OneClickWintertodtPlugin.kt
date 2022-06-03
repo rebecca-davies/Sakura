@@ -2,6 +2,7 @@ package net.runelite.client
 
 import com.google.inject.Provides
 import net.runelite.api.*
+import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.HitsplatApplied
 import net.runelite.api.events.MenuOptionClicked
@@ -77,6 +78,7 @@ class OneClickWintertodtPlugin : Plugin() {
     private var brokenBrazier: GameObject? = null
     private var roots: GameObject? = null
     private var herbPatch: GameObject? = null
+    private var risk = 0
 
     override fun startUp() {
         log.info("Starting One Click Wintertodt")
@@ -143,6 +145,15 @@ class OneClickWintertodtPlugin : Plugin() {
 
     @Subscribe
     private fun onGameTick(event: GameTick) {
+        if(!client.localPlayer.isMoving && client.localPlayer.animation == -1 && !performAction) {
+            risk++
+        }
+        if(risk > 8) {
+            state = States.SAFE
+        }
+        if(performAction) {
+            risk = 0
+        }
         if (timeout > 0) {
             timeout--
         }
@@ -231,6 +242,10 @@ class OneClickWintertodtPlugin : Plugin() {
                             return
                         }
                     }
+                    States.ENABLE_RUN -> {
+                        event.click(-1, 10485783)
+                        return
+                    }
                     States.EAT -> {
                         food.forEach {
                             try {
@@ -251,12 +266,6 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.RETURN_INSIDE -> {
-                        door?.let {
-                            event.use(it)
-                            return
-                        }
-                    }
-                    States.WAIT_TO_LEAVE -> {
                         door?.let {
                             event.use(it)
                             return
@@ -322,6 +331,10 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.IDLE -> {}
+                    States.SAFE, States.WAIT_TO_LEAVE -> {
+                       event.walkTo(WorldPoint(1630, 3974, 0))
+                        return
+                    }
                 }
             }
         }
@@ -333,12 +346,20 @@ class OneClickWintertodtPlugin : Plugin() {
 
     private fun handleLogic() {
         with(inventories) {
+            if((state == States.CONFIRM_EXIT || state == States.LEAVE_DOOR) && door == null) {
+                state = States.SAFE
+                return
+            }
             if(client.getWidget(LEVEL_UP_CONTINUE) != null) {
                 performAction = true
             }
             if(state == States.FIREMAKING && relight) {
                 performAction = true
                 relight = false
+            }
+            if(client.energy >= 99 && client.getVarpValue(173) == 0) {
+                state = States.ENABLE_RUN
+                return
             }
             when (client.localPlayer!!.worldLocation.regionID) {
                 BANK_REGION -> {
@@ -381,7 +402,6 @@ class OneClickWintertodtPlugin : Plugin() {
                     if (client.localPlayer.worldLocation.isInArea(LOBBY_AREA) && !client.localPlayer.isMoving) {
                         performAction = true
                     }
-
                     if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= health) {
                         if (!inventory.contains(food)) {
                             if(client.getWidget(POINTS_STRING)?.text?.filter { it.isDigit() }?.toInt()!! >= 500) {
@@ -394,6 +414,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.EAT
                         return
                     }
+
                     if(client.getWidget(INTERFACE_TEXT)?.text?.isEmpty() == true) {
                         gameStarted = true
                     }
@@ -419,12 +440,12 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                     if(!healPyro) {
                         if(se) {
-                            if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS) {
+                            if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && litBrazier == null) {
                                 se = false
                                 hideyHole = SW_HIDEY_HOLE
                             }
                         } else {
-                            if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SW_PYROMANCER_POS) {
+                            if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SW_PYROMANCER_POS && litBrazier == null) {
                                 hideyHole = SE_HIDEY_HOLE
                                 se = true
                             }
@@ -460,7 +481,20 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.PICK_HERB
                         return
                     }
+                    if(client.getWidget(396, 21)?.text?.filter { it.isDigit() }?.toInt()!! < 13) {
+                        if(inventory.contains(ItemID.BRUMA_KINDLING) && !inventory.contains(ItemID.BRUMA_ROOT) && litBrazier != null) {
+                            state = States.FIREMAKING
+                            return
+                        }
+                        if(state == States.FLETCHING && inventory.contains(ItemID.BRUMA_ROOT)) {
+                            return
+                        }
+                        if(inventory.quantity(ItemID.BRUMA_ROOT) > 5) {
+                            state = States.FLETCHING
+                            return
+                        }
 
+                    }
                     if (fletch && inventory.contains(ItemID.BRUMA_ROOT) && (inventory.freeSpace() <= 0 || (inventory.quantity(ItemID.BRUMA_ROOT) + inventory.quantity(ItemID.BRUMA_KINDLING)) >= 10)) {
                         state = States.FLETCHING
                         return
@@ -477,7 +511,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.FIREMAKING
                         return
                     }
-                    if (state != States.WOODCUTTING && unlitBrazier != null) {
+                    if ((state != States.WOODCUTTING || state != States.MOVE_TO_HIDEY_HOLE) && unlitBrazier != null) {
                         state = States.LIGHT_BRAZIER
                         return
                     }

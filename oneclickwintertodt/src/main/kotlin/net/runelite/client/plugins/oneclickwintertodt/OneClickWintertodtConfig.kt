@@ -16,6 +16,7 @@ interface OneClickWintertodtConfig : Config {
         LOBSTER("Lobster", listOf(ItemID.LOBSTER)),
         POTATO_AND_CHEESE("Potato with Cheese", listOf(ItemID.POTATO_WITH_CHEESE)),
         SWORDFISH("Swordfish", listOf(ItemID.SWORDFISH)),
+        MONKFISH("Monkfish", listOf(ItemID.MONKFISH)),
         KARAMBWAN("Karambwan", listOf(ItemID.COOKED_KARAMBWAN)),
         SARADOMIN_BREWS("Saradomin brews", listOf(ItemID.SARADOMIN_BREW1, ItemID.SARADOMIN_BREW2, ItemID.SARADOMIN_BREW3, ItemID.SARADOMIN_BREW4)),
         SHARK("Shark", listOf(ItemID.SHARK));

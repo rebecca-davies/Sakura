@@ -26,8 +26,8 @@
 rootProject.name = "Externals"
 include(":oneclickcomborunecrafting")
 include(":oneclickwintertodt")
-include(":anonymizer")
 //include(":oneclickconstruction")
+include(":anonymizer")
 for (project in rootProject.children) {
     project.apply {
         projectDir = file(name)

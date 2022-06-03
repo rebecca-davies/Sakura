@@ -5,6 +5,8 @@ import net.runelite.api.*
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.events.NpcSpawned
+import net.runelite.api.events.WidgetClosed
+import net.runelite.api.events.WidgetPressed
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
@@ -34,8 +36,6 @@ import kotlin.properties.Delegates
 )
 class OneClickConstructionPlugin : Plugin() {
 
-
-
     @Inject
     private lateinit var config: OneClickConstructionConfig
 
@@ -61,6 +61,7 @@ class OneClickConstructionPlugin : Plugin() {
     private var built: TileObject? = null
     private var inUse = false
     private var butler: NPC? = null
+    private var consume = false
 
     override fun startUp() {
         log.info("Starting One Click Construction")
@@ -79,7 +80,7 @@ class OneClickConstructionPlugin : Plugin() {
 
     var state by Delegates.observable(States.IDLE) { property, previous, current ->
         if (previous != current) {
-            performAction = true
+            consume = false
         }
     }
 
@@ -87,6 +88,7 @@ class OneClickConstructionPlugin : Plugin() {
     private fun onConfigChanged(event: ConfigChanged) {
         method = config.method()
     }
+
 
     @Subscribe
     private fun onGameTick(event: GameTick) {
@@ -122,14 +124,15 @@ class OneClickConstructionPlugin : Plugin() {
     }
 
     @Subscribe
+    fun onWidgetPressed(event: WidgetPressed) {
+        consume = true
+    }
+    @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         handleLogic()
-        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "state=$state ${buildable?.name} ${built?.name} built=${method.built} buildable=${method.buildable} ${method.type} inUse=$inUse process=$performAction", "")
-        if(!performAction) {
-            event.consume()
+        if(consume) {
+            return
         }
-        performAction = false
-
         with(entries) {
             when (state) {
                 States.BUILD -> {
@@ -155,10 +158,8 @@ class OneClickConstructionPlugin : Plugin() {
                 States.CALL_BUTLER -> {
                     if(client.getWidget(24248339) == null) {
                         event.click(-1, 7602250)
-
                         return
                     }
-                    performAction = true
                     event.click(-1, 24248339)
                     return
                 }
@@ -166,10 +167,9 @@ class OneClickConstructionPlugin : Plugin() {
                     if(client.getWidget(14352385) == null) {
                         butler?.let {
                             event.talkTo(butler!!, MenuAction.NPC_FIRST_OPTION)
+                            return
                         }
-                        return
                     }
-                    performAction = true
                     inUse = true
                     event.talk(1, 14352385)
                     return
@@ -177,9 +177,7 @@ class OneClickConstructionPlugin : Plugin() {
                 else -> {}
             }
         }
-
     }
-
     private fun handleLogic() {
         with(inventories) {
             if (!inUse && (butler == null || butler?.worldLocation?.distanceTo(client.localPlayer.worldLocation)!! > 1)) {

@@ -91,6 +91,19 @@ class Entries {
         }
     }
 
+    fun MenuOptionClicked.click(option: Int, widget: Int) {
+        try {
+            this.menuOption = ""
+            this.menuTarget = ""
+            this.id = 1
+            this.menuAction = MenuAction.CC_OP
+            this.param0 = option
+            this.param1 = widget
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
     fun MenuOptionClicked.healPyromancer() {
         try {
             this.menuOption = "Help"

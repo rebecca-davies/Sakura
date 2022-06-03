@@ -24,5 +24,7 @@ enum class States {
     HEAL_PYROMANCER,
     WALK_TO_POS,
     WAIT_TO_LEAVE,
-    MOVE_TO_HIDEY_HOLE
+    MOVE_TO_HIDEY_HOLE,
+    SAFE,
+    ENABLE_RUN
 }
