@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.oneclickcombos
 
 import net.runelite.api.ItemID
+import net.runelite.api.coords.WorldPoint
 
 enum class Pouches(val pouch: String, val items: List<Int>) {
     MED_LARGE("Medium + Large", listOf(ItemID.MEDIUM_POUCH, ItemID.LARGE_POUCH)),
@@ -42,10 +43,10 @@ enum class RunEnergy(val potion: String, val itemId: Int) {
     }
 }
 
-enum class RuneType(val rune: String, val runeId: Int, val comboRune: Int, val actionId: Int, val ruinsId: Int, val altarId: Int, val insideId: Int, val outsideId: Int) {
-    LAVA("Lava Rune", ItemID.LAVA_RUNE, ItemID.EARTH_RUNE,6, 34817, 34764, 10315, 13107),
-    STEAM("Steam Rune", ItemID.STEAM_RUNE, ItemID.WATER_RUNE,6,  34817, 34764, 10315,  13107),
-    MUD("Mud Rune", ItemID.MUD_RUNE, ItemID.EARTH_RUNE, 4, 34815, 34762,10827, 12593);
+enum class RuneType(val rune: String, val runeId: Int, val comboRune: Int, val actionId: Int, val ruinsId: Int, val altarId: Int, val insideId: Int, val outsideId: Int, val location: WorldPoint) {
+    LAVA("Lava Rune", ItemID.LAVA_RUNE, ItemID.EARTH_RUNE,6, 34817, 34764, 10315, 13107, WorldPoint(3133,3268, 0)),
+    STEAM("Steam Rune", ItemID.STEAM_RUNE, ItemID.WATER_RUNE,6,  34817, 34764, 10315,  13107, LAVA.location),
+    MUD("Mud Rune", ItemID.MUD_RUNE, ItemID.EARTH_RUNE, 4, 34815, 34762,10827, 12593, WorldPoint(3177,3163, 0));
 
     override fun toString(): String {
         return rune

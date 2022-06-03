@@ -304,6 +304,11 @@ class OneClickCombosPlugin : Plugin() {
                         return
                     }
                     States.ENTER_RUINS -> {
+                        if(ruin == null){
+                            event.walkTo(config.rune().location)
+                            process = true
+                            return
+                        }
                         ruin?.let {
                             event.use(it)
                             return
@@ -311,7 +316,10 @@ class OneClickCombosPlugin : Plugin() {
                     }
                     States.IMBUE -> {
                         event.imbue()
-                        state = States.CRAFT_RUNES
+                        state = if(client.mapRegions.contains(config.rune().insideId))
+                            States.CRAFT_RUNES
+                        else
+                            States.ENTER_RUINS
                         return
                     }
                     States.CRAFT_RUNES -> {
@@ -363,6 +371,7 @@ class OneClickCombosPlugin : Plugin() {
     private fun checkStates() {
         with(inventories) {
             if (!client.banking()) {
+                val ruin = client.findGameObject(config.rune().ruinsId)
                 if(state == States.EMPTY_POUCHES && attributes["emptied"]!! < 3) {
                     return
                 }
@@ -377,6 +386,10 @@ class OneClickCombosPlugin : Plugin() {
                     }
                     if (client.getInventoryItem(energyPot) != null) {
                         state = States.DRINK_STAMINA
+                        return
+                    }
+                    if(client.getVarbitValue(5438) == 0 && client.mapRegions.contains(config.rune().outsideId) && ruin != null && client.localPlayer.worldLocation!!.distanceTo(ruin.worldLocation) <= 5){
+                        state = States.IMBUE
                         return
                     }
                     return
@@ -394,7 +407,7 @@ class OneClickCombosPlugin : Plugin() {
                     state = States.TELEPORT_TO_BANK
                     return
                 }
-                if (client.mapRegions.contains(config.rune().insideId) && client.getVarbitValue(5438) == 0) {
+                if ((client.mapRegions.contains(config.rune().insideId) && client.getVarbitValue(5438) == 0)) {
                     state = States.IMBUE
                     return
                 }
