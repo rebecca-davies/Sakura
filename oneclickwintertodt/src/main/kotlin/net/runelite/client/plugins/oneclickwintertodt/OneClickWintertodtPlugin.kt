@@ -145,7 +145,7 @@ class OneClickWintertodtPlugin : Plugin() {
 
     @Subscribe
     private fun onGameTick(event: GameTick) {
-        if(!client.localPlayer.isMoving && client.localPlayer.animation == -1 && !performAction) {
+        if(!client.localPlayer.isMoving && client.localPlayer.animation == -1 && !performAction && state != States.WAIT_TO_LEAVE) {
             risk++
         }
         if(risk > 8) {
@@ -157,7 +157,6 @@ class OneClickWintertodtPlugin : Plugin() {
         if (timeout > 0) {
             timeout--
         }
-
         bankChest = client.findGameObject(BANK_CHEST)
         door = client.findGameObject(DOOR)
         hammerCrate = client.findGameObject(HAMMER_CRATE)
@@ -331,10 +330,11 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.IDLE -> {}
-                    States.SAFE, States.WAIT_TO_LEAVE -> {
+                    States.WAIT_TO_LEAVE, States.SAFE -> {
                         event.walkTo(WorldPoint(1630, 3974, 0))
                         return
                     }
+                    else -> {}
                 }
             }
         }
@@ -346,18 +346,18 @@ class OneClickWintertodtPlugin : Plugin() {
 
     private fun handleLogic() {
         with(inventories) {
+            if(client.getWidget(LEVEL_UP_CONTINUE) != null) {
+                performAction = true
+            }
             if((state == States.CONFIRM_EXIT || state == States.LEAVE_DOOR) && door == null) {
                 state = States.SAFE
                 return
-            }
-            if(client.getWidget(LEVEL_UP_CONTINUE) != null) {
-                performAction = true
             }
             if(state == States.FIREMAKING && relight) {
                 performAction = true
                 relight = false
             }
-            if(client.energy >= 99 && client.getVarpValue(173) == 0) {
+            if(client.energy >= 50 && client.getVarpValue(173) == 0) {
                 state = States.ENABLE_RUN
                 return
             }
@@ -454,6 +454,20 @@ class OneClickWintertodtPlugin : Plugin() {
                             }
                         }
                     }
+                    if(client.getWidget(396, 21)!!.text!!.filter { it.isDigit() }.toInt() in 1..10) {
+                        if(!inventory.contains(ItemID.BRUMA_ROOT) && !inventory.contains(ItemID.BRUMA_KINDLING)) {
+                            state = States.WAIT_TO_LEAVE
+                            return
+                        }
+                        if(litBrazier != null) {
+                            state = States.FIREMAKING
+                            return
+                        }
+                        if(unlitBrazier != null) {
+                            state = States.LIGHT_BRAZIER
+                            return
+                        }
+                    }
                     if (roots == null || unlitBrazier == null && litBrazier == null && brokenBrazier == null) {
                         state = States.WALK_TO_POS
                         performAction = true
@@ -484,19 +498,11 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.PICK_HERB
                         return
                     }
-                    if(client.getWidget(396, 21)?.text?.filter { it.isDigit() }?.toInt()!! <= 10) {
-                        if(!inventory.contains(ItemID.BRUMA_ROOT) && !inventory.contains(ItemID.BRUMA_KINDLING)) {
-                            state = States.WAIT_TO_LEAVE
-                            return
-                        }
-                        state = States.FIREMAKING
-                        return
-                    }
                     if (fletch && inventory.contains(ItemID.BRUMA_ROOT) && (inventory.freeSpace() <= 0 || (inventory.quantity(ItemID.BRUMA_ROOT) + inventory.quantity(ItemID.BRUMA_KINDLING)) >= 10)) {
                         state = States.FLETCHING
                         return
                     }
-                    if (((fletch && !inventory.contains(ItemID.BRUMA_KINDLING) && litBrazier != null) || (!fletch && !canBurn && litBrazier != null)) && client.localPlayer.animation != 733) {
+                    if (((fletch && !inventory.contains(ItemID.BRUMA_KINDLING)) || (!fletch && !canBurn)) && client.localPlayer.animation != 733) {
                         if(!client.localPlayer.worldLocation.equals(hideyHole)) {
                             state = States.MOVE_TO_HIDEY_HOLE
                             return
@@ -508,7 +514,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.FIREMAKING
                         return
                     }
-                    if ((state != States.WOODCUTTING || state != States.MOVE_TO_HIDEY_HOLE) && unlitBrazier != null) {
+                    if (state != States.WOODCUTTING && unlitBrazier != null) {
                         state = States.LIGHT_BRAZIER
                         return
                     }
