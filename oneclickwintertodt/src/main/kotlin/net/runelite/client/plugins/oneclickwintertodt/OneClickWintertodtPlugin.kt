@@ -438,6 +438,9 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.LEAVE_DOOR
                         return
                     }
+                    if(state == States.WAIT_TO_LEAVE) {
+                        return
+                    }
                     if(!healPyro) {
                         if(se) {
                             if(client.findNpc(NpcID.INCAPACITATED_PYROMANCER)?.worldLocation == SE_PYROMANCER_POS && litBrazier == null) {
@@ -481,15 +484,12 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.PICK_HERB
                         return
                     }
-                    if(client.getWidget(396, 21)?.text?.filter { it.isDigit() }?.toInt()!! < 7) {
-                        if(inventory.quantity(ItemID.BRUMA_ROOT) > 8 && litBrazier != null) {
-                            state = States.FIREMAKING
+                    if(client.getWidget(396, 21)?.text?.filter { it.isDigit() }?.toInt()!! <= 10) {
+                        if(!inventory.contains(ItemID.BRUMA_ROOT) && !inventory.contains(ItemID.BRUMA_KINDLING)) {
+                            state = States.WAIT_TO_LEAVE
                             return
                         }
-                        if(state == States.FIREMAKING && inventory.contains(ItemID.BRUMA_ROOT)) {
-                            return
-                        }
-                        state = States.WOODCUTTING
+                        state = States.FIREMAKING
                         return
                     }
                     if (fletch && inventory.contains(ItemID.BRUMA_ROOT) && (inventory.freeSpace() <= 0 || (inventory.quantity(ItemID.BRUMA_ROOT) + inventory.quantity(ItemID.BRUMA_KINDLING)) >= 10)) {
