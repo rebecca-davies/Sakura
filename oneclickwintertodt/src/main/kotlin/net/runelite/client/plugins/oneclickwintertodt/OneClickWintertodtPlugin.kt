@@ -433,7 +433,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.NEED_TINDERBOX
                         return
                     }
-                    if (!gameStarted && inventory.contains(food)) {
+                    if (!gameStarted && !inventory.contains(food)) {
                         state = States.LEAVE_DOOR
                         return
                     }
