@@ -357,7 +357,7 @@ class OneClickWintertodtPlugin : Plugin() {
                 performAction = true
                 relight = false
             }
-            if(client.energy >= 50 && client.getVarpValue(173) == 0) {
+            if(client.energy >= 10 && client.getVarpValue(173) == 0) {
                 state = States.ENABLE_RUN
                 return
             }
@@ -434,7 +434,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.NEED_TINDERBOX
                         return
                     }
-                    if ((!gameStarted && inventory.quantity(food) < foodAmount) || inventory.contains(ItemID.SUPPLY_CRATE)) {
+                    if (!gameStarted && inventory.quantity(food) <= 1) {
                         state = States.LEAVE_DOOR
                         return
                     }
