@@ -437,7 +437,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.LEAVE_DOOR
                         return
                     }
-                    if(state == States.WAIT_TO_LEAVE) {
+                    if(state == States.WAIT_TO_LEAVE && client.getWidget(396, 21)!!.text!!.filter { it.isDigit() }.toInt() in 1..10) {
                         return
                     }
                     if(!healPyro) {
