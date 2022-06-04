@@ -400,7 +400,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         performAction = true
                     }
                     if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= health) {
-                        if (inventory.quantity(food) <= 1) {
+                        if (!inventory.contains(food)) {
                             if(client.getWidget(POINTS_STRING)?.text?.filter { it.isDigit() }?.toInt()!! >= 500) {
                                 state = States.WAIT_TO_LEAVE
                                 return
@@ -433,11 +433,11 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.NEED_TINDERBOX
                         return
                     }
-                    if (!gameStarted && inventory.quantity(food) <= 1) {
+                    if (!gameStarted && inventory.contains(food)) {
                         state = States.LEAVE_DOOR
                         return
                     }
-                    if(state == States.WAIT_TO_LEAVE && client.getWidget(396, 21)!!.text!!.filter { it.isDigit() }.toInt() in 1..10) {
+                    if(state == States.WAIT_TO_LEAVE && (client.getWidget(396, 21)!!.text!!.filter { it.isDigit() }.toInt() in 1..10 || client.getWidget(POINTS_STRING)?.text?.filter { it.isDigit() }?.toInt()!! >= 500)) {
                         return
                     }
                     if(!healPyro) {
