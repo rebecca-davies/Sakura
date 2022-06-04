@@ -47,6 +47,26 @@ class Entries {
         }
     }
 
+    fun MenuOptionClicked.walkNear(point: WorldPoint) {
+        try {
+            this.menuOption = "Walk here"
+            this.menuTarget = ""
+            this.id = 0
+            this.menuAction = MenuAction.WALK
+            this.param0 = point.x + (-2.. 2).random()
+            this.param1 = point.y + (-2.. 2).random()
+            this.consume()
+            val rsclient = client as RSClient
+            val local = LocalPoint.fromWorld(client, WorldPoint(this.param0, this.param1, client.plane))!!
+            rsclient.selectedSceneTileX = local.sceneX
+            rsclient.selectedSceneTileY = local.sceneY
+            rsclient.setViewportWalking(true)
+            rsclient.isCheckClick = false
+        } catch (e: Exception) {
+            this.consume()
+        }
+    }
+
     fun MenuOptionClicked.use(gameObject: GameObject) {
         try {
             this.menuOption = ""

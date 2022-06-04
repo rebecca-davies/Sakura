@@ -200,9 +200,9 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                     States.WALK_TO_POS -> {
                         if(se) {
-                            event.walkTo(SOUTHEAST)
+                            event.walkNear(SOUTHEAST)
                         } else {
-                            event.walkTo(SOUTHWEST)
+                            event.walkNear(SOUTHWEST)
                         }
                         return
                     }
@@ -331,7 +331,7 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                     States.IDLE -> {}
                     States.WAIT_TO_LEAVE, States.SAFE -> {
-                        event.walkTo(WorldPoint(1630, 3974, 0))
+                        event.walkNear(WorldPoint(1630, 3974, 0))
                         return
                     }
                     else -> {}
