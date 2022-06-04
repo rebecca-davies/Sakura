@@ -189,6 +189,7 @@ class OneClickWintertodtPlugin : Plugin() {
                 }
                 if (!performAction) {
                     event.consume()
+                    return
                 }
                 performAction = false
                 when (state) {
@@ -334,11 +335,10 @@ class OneClickWintertodtPlugin : Plugin() {
                         event.walkNear(WorldPoint(1630, 3974, 0))
                         return
                     }
-                    else -> {}
                 }
             }
         }
-        if(event.menuOption.equals("Walk here", ignoreCase = true)){
+        if(event.menuOption.equals("Walk here", ignoreCase = true)) {
             event.consume()
             return;
         }
@@ -346,9 +346,6 @@ class OneClickWintertodtPlugin : Plugin() {
 
     private fun handleLogic() {
         with(inventories) {
-            if(client.getWidget(LEVEL_UP_CONTINUE) != null) {
-                performAction = true
-            }
             if((state == States.CONFIRM_EXIT || state == States.LEAVE_DOOR) && door == null) {
                 state = States.SAFE
                 return
@@ -403,7 +400,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         performAction = true
                     }
                     if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= health) {
-                        if (!inventory.contains(food)) {
+                        if (inventory.quantity(food) <= 1) {
                             if(client.getWidget(POINTS_STRING)?.text?.filter { it.isDigit() }?.toInt()!! >= 500) {
                                 state = States.WAIT_TO_LEAVE
                                 return
@@ -414,7 +411,9 @@ class OneClickWintertodtPlugin : Plugin() {
                         state = States.EAT
                         return
                     }
-
+                    if(state == States.LIGHT_BRAZIER && unlitBrazier != null) {
+                        return
+                    }
                     if(client.getWidget(INTERFACE_TEXT)?.text?.isEmpty() == true) {
                         gameStarted = true
                     }
@@ -470,7 +469,6 @@ class OneClickWintertodtPlugin : Plugin() {
                     }
                     if (roots == null || unlitBrazier == null && litBrazier == null && brokenBrazier == null) {
                         state = States.WALK_TO_POS
-                        performAction = true
                         return
                     }
                     if (state == States.GO_TO_BRAZIER && client.getWidget(INTERFACE_TEXT)?.text?.isEmpty()!!) {
@@ -523,7 +521,6 @@ class OneClickWintertodtPlugin : Plugin() {
                         return
                     }
                     state = States.IDLE
-                    performAction = true
                     return
                 }
                 else -> {}
