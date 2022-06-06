@@ -26,6 +26,7 @@
 rootProject.name = "Externals"
 include(":oneclickcomborunecrafting")
 include(":oneclickwintertodt")
+include(":oneclickcakes")
 //include(":oneclickconstruction")
 include(":anonymizer")
 for (project in rootProject.children) {

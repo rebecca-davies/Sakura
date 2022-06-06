@@ -135,13 +135,12 @@ class OneClickCombosPlugin : Plugin() {
                 }
                 if (!process) {
                     event.consume()
+                    return
                 }
                 process = false
-
                 val bank = client.findGameObject("Bank chest")
                 val ruin = client.findGameObject(config.rune().ruinsId)
                 val altar = client.findGameObject(config.rune().altarId)
-
                 when (state) {
                     States.TELEPORT_TO_BANK -> {
                         when (config.banking()) {

@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @Extension
 @PluginDescriptor(
-    name = "Sakura Anon",
+    name = "Anonymizer",
     description = ":Prayje:",
     tags = ["rebecca", "anonymizer", "sakura", "anon"]
 )

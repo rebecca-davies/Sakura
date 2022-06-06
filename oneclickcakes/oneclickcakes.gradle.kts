@@ -5,9 +5,9 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.1.6"
-project.extra["PluginName"] = "One Click Combo Runecrafting" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "A one click combination runecrafting script" // This is the description that is used in the external plugin manager panel
+version = "1.0.0"
+project.extra["PluginName"] = "One Click Cakes" // This is the name that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "A one click cake stall thieving script." // This is the description that is used in the external plugin manager panel
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
@@ -16,7 +16,6 @@ dependencies {
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
     compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
     compileOnly("com.openosrs.rs:runescape-api:$openosrsVersion")
-
     compileOnly(Libraries.guice)
     compileOnly(Libraries.javax)
     compileOnly(Libraries.lombok)
