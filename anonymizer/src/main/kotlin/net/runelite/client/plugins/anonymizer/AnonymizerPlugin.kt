@@ -12,8 +12,8 @@ import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.ConfigChanged
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
-import net.runelite.client.plugins.oneclickshops.util.Log
-import net.runelite.client.plugins.oneclickshops.AnonymizerConfig
+import net.runelite.client.plugins.anonymizer.util.Log
+import net.runelite.client.plugins.anonymizer.AnonymizerConfig
 import net.runelite.client.util.RSTimeUnit
 import net.runelite.client.util.Text
 import org.pf4j.Extension

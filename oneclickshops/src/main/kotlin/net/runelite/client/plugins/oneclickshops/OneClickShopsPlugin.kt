@@ -12,6 +12,7 @@ import net.runelite.client.plugins.oneclickshops.States
 import net.runelite.client.plugins.oneclickshops.util.Log
 import net.runelite.client.plugins.oneclickshops.OneClickShopsConfig
 import net.runelite.client.plugins.oneclickshops.data.Shops
+import net.runelite.client.plugins.oneclickshops.shops.Shop
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
@@ -41,7 +42,7 @@ class OneClickShopsPlugin : Plugin() {
     var performAction = true
     private lateinit var shop: Shops
     lateinit var items: List<Int>
-    lateinit var store: KClass<*>
+    lateinit var store: Shop
 
     override fun startUp() {
         log.info("Starting One Click Shops")
@@ -56,7 +57,7 @@ class OneClickShopsPlugin : Plugin() {
         performAction = true
         shop = config.shop()
         items = config.items().lines().map { it.toInt() }.toList()
-        store = config.shop().clazz
+        store = config.shop().clazz::class.java.kotlin as Shop
     }
 
     var state by Delegates.observable(States.IDLE) { property, previous, current ->
@@ -77,6 +78,8 @@ class OneClickShopsPlugin : Plugin() {
             event.consume()
         }
         performAction = false
+        store.handleLogic()
+        store.handleProcess()
     }
 
 }

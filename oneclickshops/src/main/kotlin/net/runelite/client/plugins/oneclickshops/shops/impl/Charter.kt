@@ -13,7 +13,6 @@ import net.runelite.client.plugins.oneclickwintertodt.magic.shop
 import javax.inject.Inject
 
 class Charter : Shop {
-
     @Inject
     lateinit var inventories: Inventory
 
@@ -31,7 +30,7 @@ class Charter : Shop {
             val npc = client.findNpc(config.shop().npc.toList())
 
             if(WidgetInfo.INVENTORY.freeSpace() <= 0) {
-                plugin.state =States.BANK
+                plugin.state = States.BANK
                 return
             }
 
@@ -48,6 +47,6 @@ class Charter : Shop {
     }
 
     override fun handleProcess() {
-        TODO("Not yet implemented")
+        println("this is a charter")
     }
 }
