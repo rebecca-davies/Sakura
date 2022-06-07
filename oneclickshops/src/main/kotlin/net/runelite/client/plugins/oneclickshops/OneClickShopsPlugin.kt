@@ -1,5 +1,6 @@
 package net.runelite.client
 
+import com.google.inject.Guice
 import com.google.inject.Provides
 import net.runelite.api.*
 import net.runelite.api.events.MenuOptionClicked
@@ -11,12 +12,14 @@ import net.runelite.client.plugins.PluginDescriptor
 import net.runelite.client.plugins.oneclickshops.States
 import net.runelite.client.plugins.oneclickshops.util.Log
 import net.runelite.client.plugins.oneclickshops.OneClickShopsConfig
+import net.runelite.client.plugins.oneclickshops.api.entry.Entries
+import net.runelite.client.plugins.oneclickshops.api.inventory.Inventory
 import net.runelite.client.plugins.oneclickshops.data.Shops
 import net.runelite.client.plugins.oneclickshops.shops.Shop
+import net.runelite.client.plugins.oneclickshops.shops.ShopFactory
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
-import kotlin.reflect.KClass
 
 @Extension
 @PluginDescriptor(
@@ -30,7 +33,7 @@ class OneClickShopsPlugin : Plugin() {
     private lateinit var config: OneClickShopsConfig
 
     @Inject
-    lateinit var client: Client
+    private lateinit var factory: ShopFactory
 
     companion object : Log()
 
@@ -57,10 +60,10 @@ class OneClickShopsPlugin : Plugin() {
         performAction = true
         shop = config.shop()
         items = config.items().lines().map { it.toInt() }.toList()
-        store = config.shop().clazz::class.java.kotlin as Shop
+        store = factory.createInstance(config.shop().clazz)!!
     }
 
-    var state by Delegates.observable(States.IDLE) { property, previous, current ->
+    var state by Delegates.observable(States.IDLE) { _, previous, current ->
         if (previous != current) {
             performAction = true
         }
@@ -76,10 +79,11 @@ class OneClickShopsPlugin : Plugin() {
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         if(!performAction) {
             event.consume()
+            return
         }
         performAction = false
         store.handleLogic()
-        store.handleProcess()
+        store.handleEvent(event)
     }
 
 }

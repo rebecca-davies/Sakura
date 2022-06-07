@@ -11,9 +11,9 @@ project.extra["PluginDescription"] = "A one click shops script." // This is the 
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
+    compileOnly("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
     annotationProcessor(Libraries.lombok)
     kapt(Libraries.pf4j)
-    runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
     compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
     compileOnly("com.openosrs.rs:runescape-api:$openosrsVersion")
