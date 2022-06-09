@@ -36,9 +36,9 @@ fun Client.findGameObject(ids: Collection<Int>): GameObject? {
 }
 
 fun Client.banking(): Boolean {
-    return this.getItemContainer(InventoryID.BANK) != null
+    return this.getItemContainer(InventoryID.BANK) != null || this.getWidget(192, 0) != null
 }
 
 fun Client.shopping(): Boolean {
-    return this.getWidget(shop)!= null
+    return this.getItemContainer(125) != null
 }

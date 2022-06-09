@@ -47,7 +47,6 @@ subprojects {
         withType<JavaCompile> {
             options.encoding = "UTF-8"
         }
-
         withType<Jar> {
             doLast {
                 copy {

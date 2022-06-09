@@ -145,7 +145,7 @@ class OneClickWintertodtPlugin : Plugin() {
 
     @Subscribe
     private fun onGameTick(event: GameTick) {
-        if(!client.localPlayer.isMoving && client.localPlayer.animation == -1 && !performAction && state != States.WAIT_TO_LEAVE) {
+        if(!client.localPlayer.isMoving && client.localPlayer.animation == -1 && !performAction && state != States.WAIT_TO_LEAVE && gameStarted) {
             risk++
         }
         if(risk > 8) {

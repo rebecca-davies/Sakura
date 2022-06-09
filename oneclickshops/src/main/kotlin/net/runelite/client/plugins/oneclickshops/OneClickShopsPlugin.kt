@@ -3,7 +3,9 @@ package net.runelite.client
 import com.google.inject.Guice
 import com.google.inject.Provides
 import net.runelite.api.*
+import net.runelite.api.events.ItemContainerChanged
 import net.runelite.api.events.MenuOptionClicked
+import net.runelite.api.events.WorldChanged
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.ConfigChanged
@@ -14,6 +16,7 @@ import net.runelite.client.plugins.oneclickshops.util.Log
 import net.runelite.client.plugins.oneclickshops.OneClickShopsConfig
 import net.runelite.client.plugins.oneclickshops.api.entry.Entries
 import net.runelite.client.plugins.oneclickshops.api.inventory.Inventory
+import net.runelite.client.plugins.oneclickshops.client.shopping
 import net.runelite.client.plugins.oneclickshops.data.Shops
 import net.runelite.client.plugins.oneclickshops.shops.Shop
 import net.runelite.client.plugins.oneclickshops.shops.ShopFactory
@@ -35,6 +38,9 @@ class OneClickShopsPlugin : Plugin() {
     @Inject
     private lateinit var factory: ShopFactory
 
+    @Inject
+    private lateinit var client: Client
+
     companion object : Log()
 
     @Provides
@@ -46,6 +52,8 @@ class OneClickShopsPlugin : Plugin() {
     private lateinit var shop: Shops
     lateinit var items: List<Int>
     lateinit var store: Shop
+    var readyToHop = false
+    var world: Int = 0
 
     override fun startUp() {
         log.info("Starting One Click Shops")
@@ -70,6 +78,13 @@ class OneClickShopsPlugin : Plugin() {
     }
 
     @Subscribe
+    fun onWorldChanged(event: WorldChanged) {
+        println("hopped")
+        readyToHop = false
+        world = 0
+    }
+
+    @Subscribe
     private fun onConfigChanged(event: ConfigChanged) {
         shop = config.shop()
         items = config.items().lines().map { it.toInt() }.toList()
@@ -77,12 +92,12 @@ class OneClickShopsPlugin : Plugin() {
 
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
-        if(!performAction) {
-            event.consume()
-            return
-        }
-        performAction = false
         store.handleLogic()
+        if(!performAction && state != States.BUY && state != States.DEPOSIT && state != States.HOP) {
+            event.consume()
+        }
+        log.info("state = $state performAction = $performAction shopping = ${client.shopping()}")
+        performAction = false
         store.handleEvent(event)
     }
 

@@ -4,7 +4,9 @@ enum class States {
     IDLE,
     TRADE_NPC,
     BANK,
+    DEPOSIT,
     BUY,
-    CLOSE_INTERFACE,
+    HOP,
+    CLOSE_INTERFACE
 
 }

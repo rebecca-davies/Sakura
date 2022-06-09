@@ -91,12 +91,12 @@ class Entries {
         }
     }
 
-    fun MenuOptionClicked.talk(option: Int, widget: Int) {
+    fun MenuOptionClicked.click(option: Int, widget: Int) {
         try {
-            this.menuOption = ""
-            this.menuTarget = ""
-            this.id = 0
-            this.menuAction = MenuAction.WIDGET_CONTINUE
+            this.menuOption = "Switch"
+            this.menuTarget = "<col=ff9040>$option</col>"
+            this.id = 1
+            this.menuAction = MenuAction.CC_OP
             this.param0 = option
             this.param1 = widget
         } catch (e: Exception) {
@@ -117,14 +117,14 @@ class Entries {
         }
     }
 
-    fun MenuOptionClicked.closeBank() {
+    fun MenuOptionClicked.closeBank(widget: Int? = 786434) {
         try {
             this.menuOption = "Close"
             this.menuTarget = ""
             this.id = 1
             this.menuAction = MenuAction.CC_OP
             this.param0 = 11
-            this.param1 = 786434
+            this.param1 = widget!!
         } catch (e: Exception) {
             this.consume()
         }

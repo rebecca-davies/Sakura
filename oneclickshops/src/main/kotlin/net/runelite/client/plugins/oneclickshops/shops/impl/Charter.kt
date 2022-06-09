@@ -1,43 +1,66 @@
 package net.runelite.client.plugins.oneclickshops.shops.impl
 
-import com.google.inject.Guice
-import com.google.inject.Module
-import net.runelite.api.Client
+import net.runelite.api.GameObject
+import net.runelite.api.InventoryID
 import net.runelite.api.MenuAction
 import net.runelite.api.NPC
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.OneClickShopsPlugin
+import net.runelite.client.callback.ClientThread
 import net.runelite.client.plugins.oneclickshops.OneClickShopsConfig
 import net.runelite.client.plugins.oneclickshops.States
 import net.runelite.client.plugins.oneclickshops.api.entry.Entries
 import net.runelite.client.plugins.oneclickshops.api.inventory.Inventory
-import net.runelite.client.plugins.oneclickshops.client.findNpc
-import net.runelite.client.plugins.oneclickshops.client.shopping
+import net.runelite.client.plugins.oneclickshops.client.*
 import net.runelite.client.plugins.oneclickshops.shops.Shop
 import net.runelite.client.plugins.oneclickwintertodt.magic.shop
-import javax.inject.Inject
-import javax.inject.Named
+import net.runelite.api.widgets.WidgetInfo.DEPOSIT_BOX_INVENTORY_ITEMS_CONTAINER as deposit
 
-class Charter : Shop {
+class Charter() : Shop {
 
     var npc: NPC? = null
+    var depositBox: GameObject? = null
     override lateinit var events: Entries
     override lateinit var inventories: Inventory
     override lateinit var plugin: OneClickShopsPlugin
     override lateinit var config: OneClickShopsConfig
+    override lateinit var worldHop: WorldHop
+    override lateinit var clientThread: ClientThread
 
     override fun handleLogic() {
         with(inventories) {
             npc = client.findNpc(config.shop().npc.toList())
+            depositBox = client.findGameObject("Bank Deposit Box")
 
-            if(WidgetInfo.INVENTORY.freeSpace() <= 0) {
+            if(client.banking() && WidgetInfo.DEPOSIT_BOX_INVENTORY_ITEMS_CONTAINER.contains(plugin.items) ) {
+                plugin.state = States.DEPOSIT
+                return
+            }
+            if(!client.banking() && client.getItemContainer(InventoryID.INVENTORY)?.freeSpace() == 0) {
                 plugin.state = States.BANK
                 return
             }
-
-            if(client.shopping() && shop.contains(plugin.items)) {
-                plugin.state = States.BUY
+            if(!client.banking() && plugin.readyToHop && client.getItemContainer(InventoryID.INVENTORY)?.contains(plugin.items) == true) {
+                plugin.state = States.BANK
+                return
+            }
+            if(client.shopping()) {
+                val hasStock: Boolean = client.getItemContainer(125)!!.items.filter { plugin.items.contains(it.id) }.any { it.quantity > 1 }
+                if(hasStock) {
+                    plugin.state = States.BUY
+                    return
+                }
+                plugin.readyToHop = true
+                return
+            }
+            if(plugin.readyToHop) {
+                if(client.banking()) {
+                    plugin.state = States.CLOSE_INTERFACE
+                    return
+                }
+                plugin.world = worldHop.findNextWorld()
+                plugin.state = States.HOP
                 return
             }
             if(npc != null) {
@@ -49,17 +72,54 @@ class Charter : Shop {
 
     override fun handleEvent(event: MenuOptionClicked) {
         with(events) {
-            when (plugin.state) {
-                States.BANK -> {
-
-                }
-                States.TRADE_NPC -> {
-                    npc?.let {
-                        event.trade(it, MenuAction.NPC_FIRST_OPTION)
+            with(inventories) {
+                when (plugin.state) {
+                    States.CLOSE_INTERFACE -> {
+                        event.closeBank(12582913)
                         return
                     }
+                    States.HOP -> {
+                        clientThread.invoke(Runnable {
+                            if (client.getWidget(WidgetInfo.WORLD_SWITCHER_LIST) == null) {
+                                client.openWorldHopper()
+                                return@Runnable
+                            }
+                            client.invokeMenuAction("Switch", "<col=ff9040>${plugin.world}</col>", 1, MenuAction.CC_OP.id, plugin.world, WidgetInfo.WORLD_SWITCHER_LIST.id)
+                        })
+                        return
+                    }
+                    States.DEPOSIT -> {
+                        plugin.items.forEach { item ->
+                            deposit.getItem(item)?.let {
+                                event.clickItem(it, 5, deposit)
+                                return
+                            }
+                        }
+                    }
+                    States.BANK -> {
+                        depositBox?.let {
+                            event.use(it)
+                            return
+                        }
+                    }
+                    States.BUY -> {
+                        plugin.items.forEach { item ->
+                            shop.getItem(item)?.let {
+                                if(it.itemQuantity > 1) {
+                                    event.clickItem(it, 5, shop)
+                                    return
+                                }
+                            }
+                        }
+                    }
+                    States.TRADE_NPC -> {
+                        npc?.let {
+                            event.trade(it, MenuAction.NPC_THIRD_OPTION)
+                            return
+                        }
+                    }
+                    else -> {}
                 }
-                else -> {}
             }
         }
     }

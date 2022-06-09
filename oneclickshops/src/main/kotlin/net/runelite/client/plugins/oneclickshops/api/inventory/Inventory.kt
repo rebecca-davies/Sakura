@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.oneclickshops.api.inventory
 
 import net.runelite.api.Client
+import net.runelite.api.ItemContainer
 import net.runelite.api.widgets.Widget
 import net.runelite.api.widgets.WidgetInfo
 import javax.inject.Inject
@@ -11,7 +12,12 @@ class Inventory {
     lateinit var client: Client
 
     fun WidgetInfo.getItem(id: Int): Widget? {
-        return client.getWidget(this)?.dynamicChildren?.first { it.itemId == id }
+        try {
+            return client.getWidget(this)?.dynamicChildren?.first { it.itemId == id }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 
     fun WidgetInfo.contains(id: List<Any>): Boolean {
@@ -31,11 +37,16 @@ class Inventory {
     }
 
     fun WidgetInfo.freeSpace(): Int {
-        return 28 - client.getWidget(this)?.dynamicChildren?.filter { it.itemId != 6512 }?.size!!
+        return client.getWidget(this)?.dynamicChildren?.filter { it.itemId != 6512 }?.size ?: -1
     }
 
     fun Int.getItem(id: Int): Widget? {
-        return client.getWidget(this)?.dynamicChildren?.first { it.itemId == id }
+        try {
+            return client.getWidget(this)?.dynamicChildren?.first { it.itemId == id }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 
     fun Int.contains(id: List<Any>): Boolean {
@@ -56,5 +67,14 @@ class Inventory {
 
     fun Int.freeSpace(): Int {
         return 28 - client.getWidget(this)?.dynamicChildren?.filter { it.itemId != 6512 }?.size!!
+    }
+
+    fun ItemContainer.contains(id: List<Any>): Boolean {
+        return this.items.map { it.id }.any(id::contains)
+    }
+
+    fun ItemContainer.freeSpace(): Int {
+        println(this.items.map { it.id }.joinToString(", "))
+        return 28 - this.items.filter { it.id != -1 }.size
     }
 }
