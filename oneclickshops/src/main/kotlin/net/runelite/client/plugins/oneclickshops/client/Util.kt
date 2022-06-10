@@ -40,5 +40,5 @@ fun Client.banking(): Boolean {
 }
 
 fun Client.shopping(): Boolean {
-    return this.getItemContainer(125) != null
+    return this.getWidget(300, 16) != null
 }

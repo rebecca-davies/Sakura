@@ -46,7 +46,7 @@ class Charter() : Shop {
                 return
             }
             if(client.shopping()) {
-                val hasStock: Boolean = client.getItemContainer(125)!!.items.filter { plugin.items.contains(it.id) }.any { it.quantity > 1 }
+                val hasStock: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity > 1 }
                 if(hasStock) {
                     plugin.state = States.BUY
                     return

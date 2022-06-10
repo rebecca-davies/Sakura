@@ -68,7 +68,7 @@ class OneClickShopsPlugin : Plugin() {
         performAction = true
         shop = config.shop()
         items = config.items().lines().map { it.toInt() }.toList()
-        store = factory.createInstance(config.shop().clazz)!!
+        store = factory.createInstance(config.shop().clazz)
     }
 
     var state by Delegates.observable(States.IDLE) { _, previous, current ->
@@ -79,9 +79,12 @@ class OneClickShopsPlugin : Plugin() {
 
     @Subscribe
     fun onWorldChanged(event: WorldChanged) {
-        println("hopped")
         readyToHop = false
         world = 0
+    }
+
+    @Subscribe
+    fun onItemContainerChanged(event: ItemContainerChanged) {
     }
 
     @Subscribe
@@ -93,12 +96,11 @@ class OneClickShopsPlugin : Plugin() {
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         store.handleLogic()
-        if(!performAction && state != States.BUY && state != States.DEPOSIT && state != States.HOP) {
+        log.info("state = $state performAction = $performAction shopping = ${client.shopping()}")
+        if (!performAction && state != States.BUY && state != States.DEPOSIT && state != States.HOP) {
             event.consume()
         }
-        log.info("state = $state performAction = $performAction shopping = ${client.shopping()}")
         performAction = false
         store.handleEvent(event)
     }
-
 }
