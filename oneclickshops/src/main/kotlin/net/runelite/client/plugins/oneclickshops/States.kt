@@ -7,6 +7,7 @@ enum class States {
     DEPOSIT,
     BUY,
     HOP,
-    CLOSE_INTERFACE
+    CLOSE_INTERFACE,
+    WALK_NEAR_NPC
 
 }

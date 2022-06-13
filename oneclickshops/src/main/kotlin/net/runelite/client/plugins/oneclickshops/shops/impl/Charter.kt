@@ -4,6 +4,7 @@ import net.runelite.api.GameObject
 import net.runelite.api.InventoryID
 import net.runelite.api.MenuAction
 import net.runelite.api.NPC
+import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.OneClickShopsPlugin
@@ -21,6 +22,7 @@ class Charter() : Shop {
 
     var npc: NPC? = null
     var depositBox: GameObject? = null
+    var lastKnownLocation: WorldPoint? = null
     override lateinit var events: Entries
     override lateinit var inventories: Inventory
     override lateinit var plugin: OneClickShopsPlugin
@@ -46,8 +48,8 @@ class Charter() : Shop {
                 return
             }
             if(client.shopping()) {
-                val hasStock: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity > 1 }
-                if(hasStock) {
+                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 0 }
+                if(!isEmpty) {
                     plugin.state = States.BUY
                     return
                 }
@@ -63,7 +65,11 @@ class Charter() : Shop {
                 plugin.state = States.HOP
                 return
             }
-            if(npc != null) {
+            if(npc == null) {
+                plugin.state = States.WALK_NEAR_NPC
+                return
+            } else {
+                lastKnownLocation = npc?.worldLocation
                 plugin.state = States.TRADE_NPC
                 return
             }
@@ -74,6 +80,10 @@ class Charter() : Shop {
         with(events) {
             with(inventories) {
                 when (plugin.state) {
+                    States.WALK_NEAR_NPC -> {
+                        event.walkTo(lastKnownLocation!!)
+                        return
+                    }
                     States.CLOSE_INTERFACE -> {
                         event.closeBank(12582913)
                         return
