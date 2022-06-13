@@ -53,8 +53,6 @@ class Charter() : Shop {
                     plugin.state = States.BUY
                     return
                 }
-                plugin.readyToHop = true
-                return
             }
             if(plugin.readyToHop) {
                 if(client.banking()) {
@@ -107,6 +105,9 @@ class Charter() : Shop {
                         }
                     }
                     States.BANK -> {
+                        if(client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 0 }) {
+                            plugin.readyToHop = true
+                        }
                         depositBox?.let {
                             event.use(it)
                             return

@@ -96,7 +96,7 @@ class OneClickShopsPlugin : Plugin() {
     @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         store.handleLogic()
-        log.info("state = $state performAction = $performAction shopping = ${client.shopping()}")
+        log.info("state = $state performAction = $performAction shopping = ${client.shopping()} readytohop = $readyToHop")
         if (!performAction && state != States.BUY && state != States.DEPOSIT && state != States.HOP) {
             event.consume()
         }

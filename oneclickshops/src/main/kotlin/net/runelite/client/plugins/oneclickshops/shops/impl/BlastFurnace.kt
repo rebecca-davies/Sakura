@@ -48,13 +48,11 @@ class BlastFurnace() : Shop {
                 return
             }
             if(client.shopping()) {
-                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 0 }
+                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 47 }
                 if(!isEmpty) {
                     plugin.state = States.BUY
                     return
                 }
-                plugin.readyToHop = true
-                return
             }
             if(plugin.readyToHop) {
                 if(client.banking()) {
@@ -107,6 +105,9 @@ class BlastFurnace() : Shop {
                         }
                     }
                     States.BANK -> {
+                        if(client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 47 }) {
+                            plugin.readyToHop = true
+                        }
                         bank?.let {
                             event.use(it)
                             return
@@ -115,7 +116,7 @@ class BlastFurnace() : Shop {
                     States.BUY -> {
                         plugin.items.forEach { item ->
                             shop.getItem(item)?.let {
-                                if(it.itemQuantity <= 0) {
+                                if(it.itemQuantity <= 47) {
                                     return@forEach
                                 }
                                 event.clickItem(it, 5, shop)
