@@ -57,7 +57,7 @@ class BlastFurnace() : Shop {
                 return
             }
             if(client.shopping()) {
-                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 46 }
+                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.all { it.itemQuantity <= 46 }
                 if(isEmpty) {
                     plugin.readyToHop = true
                     plugin.state = States.CLOSE_INTERFACE
