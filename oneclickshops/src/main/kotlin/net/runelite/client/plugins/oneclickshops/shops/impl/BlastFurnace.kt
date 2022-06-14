@@ -47,13 +47,6 @@ class BlastFurnace() : Shop {
                 plugin.state = States.BANK
                 return
             }
-            if(client.shopping()) {
-                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 47 }
-                if(!isEmpty) {
-                    plugin.state = States.BUY
-                    return
-                }
-            }
             if(plugin.readyToHop) {
                 if(client.banking()) {
                     plugin.state = States.CLOSE_INTERFACE
@@ -62,6 +55,17 @@ class BlastFurnace() : Shop {
                 plugin.world = worldHop.findNextWorld()
                 plugin.state = States.HOP
                 return
+            }
+            if(client.shopping()) {
+                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 47 }
+                if(isEmpty) {
+                    plugin.readyToHop = true
+                    plugin.state = States.CLOSE_INTERFACE
+                    return
+                } else {
+                    plugin.state = States.BUY
+                    return
+                }
             }
             if(npc == null) {
                 plugin.state = States.WALK_NEAR_NPC
@@ -83,7 +87,14 @@ class BlastFurnace() : Shop {
                         return
                     }
                     States.CLOSE_INTERFACE -> {
-                        event.closeBank(786434)
+                        if(client.banking()) {
+                            event.closeBank(786434)
+                            return
+                        }
+                        if(client.shopping()) {
+                            event.closeBank(19660801)
+                            return
+                        }
                         return
                     }
                     States.HOP -> {

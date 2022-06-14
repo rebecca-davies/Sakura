@@ -22,11 +22,7 @@ class WorldHop {
 		}
 		val currentWorld = worldResult.findWorld(client.world) ?: return -1
 		val currentWorldTypes = currentWorld.types.clone()
-		currentWorldTypes.remove(WorldType.PVP)
-		currentWorldTypes.remove(WorldType.HIGH_RISK)
-		currentWorldTypes.remove(WorldType.BOUNTY)
 		currentWorldTypes.remove(WorldType.SKILL_TOTAL)
-		currentWorldTypes.remove(WorldType.LAST_MAN_STANDING)
 		val worlds = worldResult.worlds
 		var worldIdx = worlds.indexOf(currentWorld)
 		val totalLevel = client.totalLevel
@@ -38,8 +34,6 @@ class WorldHop {
 				}
 			world = worlds[worldIdx]
 			val types = world.types.clone()
-			types.remove(WorldType.BOUNTY)
-			types.remove(WorldType.LAST_MAN_STANDING)
 			if (types.contains(WorldType.SKILL_TOTAL)) {
 				try {
 					val totalRequirement = world.activity.substring(0, world.activity.indexOf(" ")).toInt()
@@ -49,11 +43,9 @@ class WorldHop {
 				} catch (ex: NumberFormatException) {
 				}
 			}
-
 			if (world.players >= 1500) {
 				continue
 			}
-
 			if (currentWorldTypes == types) {
 				break
 			}
