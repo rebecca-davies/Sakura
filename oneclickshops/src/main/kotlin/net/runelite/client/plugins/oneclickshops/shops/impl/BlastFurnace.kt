@@ -57,7 +57,7 @@ class BlastFurnace() : Shop {
                 return
             }
             if(client.shopping()) {
-                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 47 }
+                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 46 }
                 if(isEmpty) {
                     plugin.readyToHop = true
                     plugin.state = States.CLOSE_INTERFACE
@@ -87,7 +87,15 @@ class BlastFurnace() : Shop {
                         return
                     }
                     States.CLOSE_INTERFACE -> {
-
+                        if(client.banking()) {
+                            event.closeBank(786434)
+                            return
+                        }
+                        if(client.shopping()) {
+                            event.closeBank(19660801)
+                            return
+                        }
+                        return
                     }
                     States.HOP -> {
                         clientThread.invoke(Runnable {
@@ -116,7 +124,7 @@ class BlastFurnace() : Shop {
                     States.BUY -> {
                         plugin.items.forEach { item ->
                             shop.getItem(item)?.let {
-                                if(it.itemQuantity <= 47) {
+                                if(it.itemQuantity <= 46) {
                                     return@forEach
                                 }
                                 event.clickItem(it, 5, shop)
