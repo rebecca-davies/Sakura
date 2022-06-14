@@ -43,7 +43,7 @@ class BlastFurnace() : Shop {
                 plugin.state = States.BANK
                 return
             }
-            if(!client.banking() && plugin.readyToHop && client.getItemContainer(InventoryID.INVENTORY)?.contains(plugin.items) == true) {
+            if(!client.banking() && plugin.readyToHop && client.getItemContainer(InventoryID.INVENTORY)?.contains(plugin.items) == true && client.getItemContainer(InventoryID.INVENTORY)?.freeSpace() == 0) {
                 plugin.state = States.BANK
                 return
             }
@@ -87,15 +87,7 @@ class BlastFurnace() : Shop {
                         return
                     }
                     States.CLOSE_INTERFACE -> {
-                        if(client.banking()) {
-                            event.closeBank(786434)
-                            return
-                        }
-                        if(client.shopping()) {
-                            event.closeBank(19660801)
-                            return
-                        }
-                        return
+
                     }
                     States.HOP -> {
                         clientThread.invoke(Runnable {
@@ -116,9 +108,6 @@ class BlastFurnace() : Shop {
                         }
                     }
                     States.BANK -> {
-                        if(client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 47 }) {
-                            plugin.readyToHop = true
-                        }
                         bank?.let {
                             event.use(it)
                             return

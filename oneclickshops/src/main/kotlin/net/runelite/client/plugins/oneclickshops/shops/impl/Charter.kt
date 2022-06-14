@@ -43,16 +43,9 @@ class Charter() : Shop {
                 plugin.state = States.BANK
                 return
             }
-            if(!client.banking() && plugin.readyToHop && client.getItemContainer(InventoryID.INVENTORY)?.contains(plugin.items) == true) {
+            if(!client.banking() && plugin.readyToHop && client.getItemContainer(InventoryID.INVENTORY)?.contains(plugin.items) == true && client.getItemContainer(InventoryID.INVENTORY)?.freeSpace() == 0) {
                 plugin.state = States.BANK
                 return
-            }
-            if(client.shopping()) {
-                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 0 }
-                if(!isEmpty) {
-                    plugin.state = States.BUY
-                    return
-                }
             }
             if(plugin.readyToHop) {
                 if(client.banking()) {
@@ -62,6 +55,17 @@ class Charter() : Shop {
                 plugin.world = worldHop.findNextWorld()
                 plugin.state = States.HOP
                 return
+            }
+            if(client.shopping()) {
+                val isEmpty: Boolean = client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 0 }
+                if(isEmpty) {
+                    plugin.readyToHop = true
+                    plugin.state = States.CLOSE_INTERFACE
+                    return
+                } else {
+                    plugin.state = States.BUY
+                    return
+                }
             }
             if(npc == null) {
                 plugin.state = States.WALK_NEAR_NPC
@@ -83,7 +87,14 @@ class Charter() : Shop {
                         return
                     }
                     States.CLOSE_INTERFACE -> {
-                        event.closeBank(12582913)
+                        if(client.banking()) {
+                            event.closeBank(12582913)
+                            return
+                        }
+                        if(client.shopping()) {
+                            event.closeBank(19660801)
+                            return
+                        }
                         return
                     }
                     States.HOP -> {
@@ -105,9 +116,6 @@ class Charter() : Shop {
                         }
                     }
                     States.BANK -> {
-                        if(client.getWidget(WidgetInfo.PACK(300, 16))?.dynamicChildren?.filter { plugin.items.contains(it.itemId) }!!.any { it.itemQuantity <= 0 }) {
-                            plugin.readyToHop = true
-                        }
                         depositBox?.let {
                             event.use(it)
                             return
@@ -116,10 +124,11 @@ class Charter() : Shop {
                     States.BUY -> {
                         plugin.items.forEach { item ->
                             shop.getItem(item)?.let {
-                                if(it.itemQuantity > 1) {
-                                    event.clickItem(it, 5, shop)
-                                    return
+                                if(it.itemQuantity < 1) {
+                                    return@forEach
                                 }
+                                event.clickItem(it, 5, shop)
+                                return
                             }
                         }
                     }

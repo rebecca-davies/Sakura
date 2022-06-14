@@ -22,6 +22,7 @@ class WorldHop {
 		}
 		val currentWorld = worldResult.findWorld(client.world) ?: return -1
 		val currentWorldTypes = currentWorld.types.clone()
+		currentWorldTypes.remove(WorldType.LAST_MAN_STANDING)
 		currentWorldTypes.remove(WorldType.SKILL_TOTAL)
 		val worlds = worldResult.worlds
 		var worldIdx = worlds.indexOf(currentWorld)
@@ -34,6 +35,7 @@ class WorldHop {
 				}
 			world = worlds[worldIdx]
 			val types = world.types.clone()
+			types.remove(WorldType.LAST_MAN_STANDING)
 			if (types.contains(WorldType.SKILL_TOTAL)) {
 				try {
 					val totalRequirement = world.activity.substring(0, world.activity.indexOf(" ")).toInt()
