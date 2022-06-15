@@ -6,8 +6,22 @@ import net.runelite.client.config.*
 
 @ConfigGroup("OneClickHerblore")
 interface OneClickHerbloreConfig : Config {
-    enum class Potions(private val type: String, val ingredients: List<Int>, val finished: Int) {
-        ATTACK_POTION("Attack potion", listOf(ItemID.EYE_OF_NEWT, ItemID.GUAM_POTION_UNF), ItemID.ATTACK_POTION3),
+    enum class Potions(private val type: String, val ingredients: List<Int>, val product: Int) {
+        GUAM_POTION(type = "Guam potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.GUAM_LEAF), product = ItemID.GUAM_POTION_UNF),
+        MARRENTILL_POTION(type = "Marrentill potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.MARRENTILL), product = ItemID.MARRENTILL_POTION_UNF),
+        TARROMIN_POTION(type = "Tarromin potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.TARROMIN), product = ItemID.TARROMIN_POTION_UNF),
+        HARRALANDER_POTION(type = "Harralander potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.HARRALANDER), product = ItemID.HARRALANDER_POTION_UNF),
+        RANARR_POTION(type = "Ranarr potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.RANARR_WEED), product = ItemID.RANARR_POTION_UNF),
+        TOADFLAX_POTION(type = "Toadflax potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.TOADFLAX), product = ItemID.TOADFLAX_POTION_UNF),
+        IRIT_POTION(type = "Irit potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.IRIT_LEAF), product = ItemID.IRIT_POTION_UNF),
+        AVANTOE_POTION(type = "Avantoe potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.AVANTOE), product = ItemID.AVANTOE_POTION_UNF),
+        KWUARM_POTION(type = "Kwuarm potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.KWUARM), product = ItemID.KWUARM_POTION_UNF),
+        SNAPDRAGON_POTION(type = "Snapdragon potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.SNAPDRAGON), product = ItemID.SNAPDRAGON_POTION_UNF),
+        CADANTINE_POTION(type = "Cadantine potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.CADANTINE), product = ItemID.CADANTINE_POTION_UNF),
+        LANTADYME_POTION(type = "Lantadyme potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.LANTADYME), product = ItemID.LANTADYME_POTION_UNF),
+        DWARF_WEED_POTION(type = "Dwarf weed potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.DWARF_WEED), product = ItemID.DWARF_WEED_POTION_UNF),
+        TORSTOL_POTION(type = "Torstol potion", ingredients = listOf(ItemID.VIAL_OF_WATER, ItemID.TORSTOL), product = ItemID.TORSTOL_POTION_UNF),
+        ATTACK_POTION(type = "Attack potion", ingredients = listOf(ItemID.EYE_OF_NEWT, ItemID.GUAM_POTION_UNF), product = ItemID.ATTACK_POTION3),
         ANTIPOISON("Antipoison", listOf(ItemID.UNICORN_HORN_DUST, ItemID.MARRENTILL_POTION_UNF), ItemID.ANTIPOISON3),
         STRENGTH_POTION("Strength potion", listOf(ItemID.LIMPWURT_ROOT, ItemID.TARROMIN_POTION_UNF), ItemID.STRENGTH_POTION3),
         SERUM_207("Serum 207", listOf(ItemID.ASHES, ItemID.TARROMIN_POTION_UNF), ItemID.SERUM_207_3),

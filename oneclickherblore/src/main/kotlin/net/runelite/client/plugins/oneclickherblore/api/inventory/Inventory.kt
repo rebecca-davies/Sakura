@@ -12,7 +12,7 @@ class Inventory {
     @Inject
     lateinit var client: Client
 
-    fun WidgetInfo.getItem(id: Int): Widget? {
+    fun WidgetInfo.getItem(id: Int?): Widget? {
         try {
             return client.getWidget(this)?.dynamicChildren?.firstOrNull { it.itemId == id }
         } catch (e: Exception) {
@@ -34,11 +34,19 @@ class Inventory {
     }
 
     fun WidgetInfo.containsAll(id: List<Any>): Boolean {
-        return client.getWidget(this)?.dynamicChildren?.map { it.itemId }?.all(id::contains)!!
+        return try {
+            return client.getWidget(this)?.dynamicChildren?.map { it.itemId }?.all(id::contains)!!
+        }catch (_: Exception) {
+            false
+        }
     }
 
     fun WidgetInfo.contains(id: Int): Boolean {
-        return client.getWidget(this)?.dynamicChildren?.map { it.itemId }?.contains(id)!!
+        return try {
+            client.getWidget(this)?.dynamicChildren?.map { it.itemId }?.contains(id)!!
+        }catch (_: Exception) {
+            false
+        }
     }
 
     fun WidgetInfo.quantity(id: Int): Int {

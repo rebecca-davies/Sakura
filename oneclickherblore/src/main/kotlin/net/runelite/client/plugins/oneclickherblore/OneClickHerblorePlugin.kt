@@ -8,7 +8,6 @@ import net.runelite.api.widgets.WidgetInfo
 import net.runelite.api.widgets.WidgetInfo.INVENTORY as inventory
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
-import net.runelite.client.events.ConfigChanged
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
 import net.runelite.client.plugins.oneclickherblore.OneClickHerbloreConfig.*
@@ -20,7 +19,6 @@ import net.runelite.client.plugins.oneclickherblore.util.*
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
-import net.runelite.api.InventoryID.EQUIPMENT as equipment
 import net.runelite.api.widgets.WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER as bankInventory
 import net.runelite.api.widgets.WidgetInfo.BANK_ITEM_CONTAINER as bank
 
@@ -101,7 +99,7 @@ class OneClickHerblorePlugin : Plugin() {
                 performAction = false
                 when(state) {
                     States.WITHDRAW -> {
-                        val item = config.potion().ingredients.first { !inventory.contains(it) && prev != it }.also { prev = it }
+                        val item = config.potion().ingredients.first { !client.getItemContainer(InventoryID.INVENTORY)!!.contains(it) && prev != it }.also { prev = it }
                         performAction = true
                         bank.getItem(item)?.let {
                             event.clickItem(it, 1, bank)
@@ -154,36 +152,22 @@ class OneClickHerblorePlugin : Plugin() {
                 }
             }
             if(client.banking()) {
-                if(bankInventory.contains(config.potion().finished) && !bankInventory.contains(config.potion().ingredients)) {
+                if(client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients)) {
                     state = States.DEPOSIT
                     return
                 }
-                if(!bankInventory.containsAll(config.potion().ingredients) && !bankInventory.contains(config.potion().finished)) {
+                if(!client.getItemContainer(InventoryID.INVENTORY)!!.containsAll(config.potion().ingredients) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product)) {
                     state = States.WITHDRAW
                     return
                 }
-                if(inventory.containsAll(config.potion().ingredients)) {
+                if(client.getItemContainer(InventoryID.INVENTORY)!!.containsAll(config.potion().ingredients)) {
                     state = States.CLOSE_INTERFACE
                     return
                 }
             }
-            if(inventory.contains(config.potion().finished) && !inventory.contains(config.potion().ingredients)) {
-                mixing = false
-                index = 0
-                state = States.DEPOSIT
-                return
-            }
-            if(!inventory.contains(config.potion().ingredients.first()) && !inventory.contains(config.potion().ingredients.last()) && !inventory.contains(config.potion().finished)) {
-                state = States.WITHDRAW
-                return
-            }
-            if((!inventory.contains(config.potion().ingredients.first()) || !inventory.contains(config.potion().ingredients.last())) && !inventory.contains(config.potion().finished)) {
-                state = States.WITHDRAW
-                return
-            }
             when(config.potion()) {
                 Potions.SERUM_207 -> {
-                    if(inventory.contains(config.potion().ingredients)) {
+                    if(client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients)) {
                         state = States.MIX
                         performAction = true
                         return
@@ -200,6 +184,21 @@ class OneClickHerblorePlugin : Plugin() {
                     }
                 }
             }
+            if(client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients)) {
+                mixing = false
+                index = 0
+                state = States.DEPOSIT
+                return
+            }
+            if(!client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients.first()) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients.last()) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product)) {
+                state = States.WITHDRAW
+                return
+            }
+            if((!client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients.first()) || !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients.last())) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product)) {
+                state = States.WITHDRAW
+                return
+            }
+
         }
     }
 }
