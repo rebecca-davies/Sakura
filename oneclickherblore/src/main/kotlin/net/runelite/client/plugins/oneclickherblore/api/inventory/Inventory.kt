@@ -91,12 +91,7 @@ class Inventory {
     }
 
     fun ItemContainer.contains(id: List<Any>): Boolean {
-        return try {
-            this.items.map { it.id }.any(id::contains)
-        } catch (e: Exception) {
-            false
-        }
-
+        return if(this == null) false else this.items.map { it.id }.any(id::contains)
     }
 
     fun ItemContainer.containsAll(id: List<Any>): Boolean {

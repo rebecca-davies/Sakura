@@ -2,9 +2,14 @@ package net.runelite.client.plugins.oneclickherblore
 
 import com.google.inject.Provides
 import net.runelite.api.*
+import net.runelite.api.events.ClientTick
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.MenuOptionClicked
+import net.runelite.api.events.ScriptCallbackEvent
+import net.runelite.api.events.ScriptPostFired
+import net.runelite.api.events.ScriptPreFired
 import net.runelite.api.widgets.WidgetInfo
+import net.runelite.client.callback.ClientThread
 import net.runelite.api.widgets.WidgetInfo.INVENTORY as inventory
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
@@ -15,6 +20,8 @@ import net.runelite.client.plugins.oneclickherblore.api.entry.Entries
 import net.runelite.client.plugins.oneclickherblore.api.inventory.Inventory
 import net.runelite.client.plugins.oneclickherblore.client.banking
 import net.runelite.client.plugins.oneclickherblore.client.findGameObject
+import net.runelite.client.plugins.oneclickherblore.client.inventoryContains
+import net.runelite.client.plugins.oneclickherblore.client.inventoryContainsAll
 import net.runelite.client.plugins.oneclickherblore.util.*
 import org.pf4j.Extension
 import javax.inject.Inject
@@ -43,6 +50,9 @@ class OneClickHerblorePlugin : Plugin() {
     @Inject
     lateinit var inventories: Inventory
 
+    @Inject
+    lateinit var clientThread: ClientThread
+
     companion object : Log()
     private var bankObject: GameObject? = null
     private var prev = 0
@@ -50,6 +60,7 @@ class OneClickHerblorePlugin : Plugin() {
     private var mixing = false
     private var performAction = true
     private var index = 0
+    private var closed = false
 
     @Provides
     fun provideConfig(configManager: ConfigManager): OneClickHerbloreConfig {
@@ -70,6 +81,9 @@ class OneClickHerblorePlugin : Plugin() {
         prev = 0
         timeout = 0
         mixing = false
+        index = 0
+        closed = false
+
     }
 
     private var state by Delegates.observable(States.IDLE) { _, previous, current ->
@@ -99,7 +113,7 @@ class OneClickHerblorePlugin : Plugin() {
                 performAction = false
                 when(state) {
                     States.WITHDRAW -> {
-                        val item = config.potion().ingredients.first { !client.getItemContainer(InventoryID.INVENTORY)!!.contains(it) && prev != it }.also { prev = it }
+                        val item = config.potion().ingredients.first { !client.inventoryContains(it) && prev != it }.also { prev = it }
                         performAction = true
                         bank.getItem(item)?.let {
                             event.clickItem(it, 1, bank)
@@ -148,26 +162,28 @@ class OneClickHerblorePlugin : Plugin() {
             if(state == States.DEPOSIT || state == States.WITHDRAW || state == States.OPEN_BANK) {
                 if(!client.banking()) {
                     state = States.OPEN_BANK
+                    closed = false
                     return
                 }
             }
             if(client.banking()) {
-                if(client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients)) {
+                if(client.inventoryContains(config.potion().product) && !client.inventoryContains(config.potion().ingredients)) {
                     state = States.DEPOSIT
                     return
                 }
-                if(!client.getItemContainer(InventoryID.INVENTORY)!!.containsAll(config.potion().ingredients) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product)) {
+                if(!client.inventoryContainsAll(config.potion().ingredients) && !client.inventoryContains(config.potion().product)) {
                     state = States.WITHDRAW
                     return
                 }
-                if(client.getItemContainer(InventoryID.INVENTORY)!!.containsAll(config.potion().ingredients)) {
+                if(!closed && (client.inventoryContains(config.potion().ingredients) || client.inventoryContainsAll(config.potion().ingredients) && !mixing)) {
                     state = States.CLOSE_INTERFACE
+                    closed = true
                     return
                 }
             }
             when(config.potion()) {
                 Potions.SERUM_207 -> {
-                    if(client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients)) {
+                    if(client.inventoryContains(config.potion().ingredients)) {
                         state = States.MIX
                         performAction = true
                         return
@@ -178,23 +194,23 @@ class OneClickHerblorePlugin : Plugin() {
                         state = States.CONFIRM
                         return
                     }
-                    if(inventory.containsAll(config.potion().ingredients) && !mixing) {
+                    if(client.inventoryContainsAll(config.potion().ingredients) && !mixing) {
                         state = States.MIX
                         return
                     }
                 }
             }
-            if(client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients)) {
+            if(client.inventoryContains(config.potion().product) && !client.inventoryContains(config.potion().ingredients)) {
                 mixing = false
                 index = 0
                 state = States.DEPOSIT
                 return
             }
-            if(!client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients.first()) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients.last()) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product)) {
+            if(!client.inventoryContains(config.potion().ingredients.first()) && !client.inventoryContains(config.potion().ingredients.last()) && !client.inventoryContains(config.potion().product)) {
                 state = States.WITHDRAW
                 return
             }
-            if((!client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients.first()) || !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().ingredients.last())) && !client.getItemContainer(InventoryID.INVENTORY)!!.contains(config.potion().product)) {
+            if((!client.inventoryContains(config.potion().ingredients.first()) || !client.inventoryContains(config.potion().ingredients.last())) && !client.inventoryContains(config.potion().product)) {
                 state = States.WITHDRAW
                 return
             }
