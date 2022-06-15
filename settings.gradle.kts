@@ -25,6 +25,7 @@
 
 rootProject.name = "Externals"
 include(":oneclickcomborunecrafting")
+include(":oneclickherblore")
 include(":oneclickwintertodt")
 include(":oneclickcakes")
 include(":oneclickshops")
