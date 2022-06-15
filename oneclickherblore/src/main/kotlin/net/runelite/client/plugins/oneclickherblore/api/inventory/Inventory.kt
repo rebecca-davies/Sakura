@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.oneclickherblore.api.inventory
 
 import net.runelite.api.Client
+import net.runelite.api.InventoryID
 import net.runelite.api.ItemContainer
 import net.runelite.api.widgets.Widget
 import net.runelite.api.widgets.WidgetInfo
@@ -14,6 +15,14 @@ class Inventory {
     fun WidgetInfo.getItem(id: Int): Widget? {
         try {
             return client.getWidget(this)?.dynamicChildren?.firstOrNull { it.itemId == id }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
+    }
+    fun WidgetInfo.getItemFromIndex(index: Int): Widget? {
+        try {
+            return client.getWidget(this)?.dynamicChildren?.get(index)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -89,5 +98,13 @@ class Inventory {
     fun ItemContainer.freeSpace(): Int {
         println(this.items.map { it.id }.joinToString(", "))
         return 28 - this.items.filter { it.id != -1 }.size
+    }
+
+    fun InventoryID.wearing(id: Int): Boolean {
+        return this.contains(id)
+    }
+
+    fun InventoryID.contains(id: Int): Boolean {
+        return client.getItemContainer(this)?.items?.map { it.id }?.contains(id)!!
     }
 }

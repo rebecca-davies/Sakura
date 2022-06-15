@@ -5,9 +5,9 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.1.6"
+version = "1.1.8"
 project.extra["PluginName"] = "One Click Combo Runecrafting" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "A one click combination runecrafting script" // This is the description that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "Craft combination runes (lavas, muds, etc) by clicking anywhere on your screen." // This is the description that is used in the external plugin manager panel
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")

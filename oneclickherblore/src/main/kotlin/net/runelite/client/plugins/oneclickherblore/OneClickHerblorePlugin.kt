@@ -11,6 +11,7 @@ import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.ConfigChanged
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
+import net.runelite.client.plugins.oneclickherblore.OneClickHerbloreConfig.*
 import net.runelite.client.plugins.oneclickherblore.api.entry.Entries
 import net.runelite.client.plugins.oneclickherblore.api.inventory.Inventory
 import net.runelite.client.plugins.oneclickherblore.client.banking
@@ -19,6 +20,7 @@ import net.runelite.client.plugins.oneclickherblore.util.*
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
+import net.runelite.api.InventoryID.EQUIPMENT as equipment
 import net.runelite.api.widgets.WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER as bankInventory
 import net.runelite.api.widgets.WidgetInfo.BANK_ITEM_CONTAINER as bank
 
@@ -49,6 +51,7 @@ class OneClickHerblorePlugin : Plugin() {
     private var timeout = 0
     private var mixing = false
     private var performAction = true
+    private var index = 0
 
     @Provides
     fun provideConfig(configManager: ConfigManager): OneClickHerbloreConfig {
@@ -79,7 +82,7 @@ class OneClickHerblorePlugin : Plugin() {
 
     @Subscribe
     private fun onGameTick(event: GameTick) {
-        bankObject = client.findGameObject("Bank chest", "Bank booth")
+        bankObject = client.findGameObject("Bank chest")
         if(timeout > 0) {
             timeout--
         }
@@ -100,18 +103,14 @@ class OneClickHerblorePlugin : Plugin() {
                     States.WITHDRAW -> {
                         val item = config.potion().ingredients.first { !inventory.contains(it) && prev != it }.also { prev = it }
                         performAction = true
-                        timeout = 1
                         bank.getItem(item)?.let {
                             event.clickItem(it, 1, bank)
                             return
                         }
                     }
                     States.DEPOSIT -> {
-                        performAction = true
-                        bankInventory.getItem(config.potion().finished)?.let {
-                            event.clickItem(it, 8, bankInventory)
+                            event.click(-1, 786474)
                             return
-                        }
                     }
                     States.CONFIRM -> {
                         mixing = true
@@ -119,6 +118,11 @@ class OneClickHerblorePlugin : Plugin() {
                         return
                     }
                     States.MIX -> {
+                        if(config.potion() == Potions.SERUM_207) {
+                            event.useOn(inventory.getItemFromIndex(index), inventory.getItemFromIndex(index + 14))
+                            index++
+                            return
+                        }
                         event.useOn(inventory.getItem(config.potion().ingredients.first()), inventory.getItem(config.potion().ingredients.last()))
                         return
                     }
@@ -143,16 +147,11 @@ class OneClickHerblorePlugin : Plugin() {
 
     private fun handleLogic() {
         with(inventories) {
-            if(state == States.DEPOSIT || state == States.WITHDRAW) {
+            if(state == States.DEPOSIT || state == States.WITHDRAW || state == States.OPEN_BANK) {
                 if(!client.banking()) {
-
                     state = States.OPEN_BANK
                     return
                 }
-            }
-            if(state == States.MIX && client.banking()) {
-                state = States.CLOSE_INTERFACE
-                return
             }
             if(client.banking()) {
                 if(bankInventory.contains(config.potion().finished) && !bankInventory.contains(config.potion().ingredients)) {
@@ -163,27 +162,43 @@ class OneClickHerblorePlugin : Plugin() {
                     state = States.WITHDRAW
                     return
                 }
-                if(bankInventory.containsAll(config.potion().ingredients) && !mixing) {
-                    state = States.MIX
+                if(inventory.containsAll(config.potion().ingredients)) {
+                    state = States.CLOSE_INTERFACE
                     return
                 }
             }
             if(inventory.contains(config.potion().finished) && !inventory.contains(config.potion().ingredients)) {
                 mixing = false
+                index = 0
                 state = States.DEPOSIT
                 return
             }
-            if(!inventory.containsAll(config.potion().ingredients) && !inventory.contains(config.potion().finished)) {
+            if(!inventory.contains(config.potion().ingredients.first()) && !inventory.contains(config.potion().ingredients.last()) && !inventory.contains(config.potion().finished)) {
                 state = States.WITHDRAW
                 return
             }
-            if(client.getWidget(WidgetInfo.MULTI_SKILL_MENU) != null && !mixing) {
-                state = States.CONFIRM
+            if((!inventory.contains(config.potion().ingredients.first()) || !inventory.contains(config.potion().ingredients.last())) && !inventory.contains(config.potion().finished)) {
+                state = States.WITHDRAW
                 return
             }
-            if(inventory.containsAll(config.potion().ingredients) && !mixing) {
-                state = States.MIX
-                return
+            when(config.potion()) {
+                Potions.SERUM_207 -> {
+                    if(inventory.contains(config.potion().ingredients)) {
+                        state = States.MIX
+                        performAction = true
+                        return
+                    }
+                }
+                else -> {
+                    if(client.getWidget(WidgetInfo.MULTI_SKILL_MENU) != null && !mixing) {
+                        state = States.CONFIRM
+                        return
+                    }
+                    if(inventory.containsAll(config.potion().ingredients) && !mixing) {
+                        state = States.MIX
+                        return
+                    }
+                }
             }
         }
     }

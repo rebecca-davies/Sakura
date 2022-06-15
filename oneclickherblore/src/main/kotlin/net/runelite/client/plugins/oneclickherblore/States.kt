@@ -7,5 +7,5 @@ enum class States {
     MIX,
     OPEN_BANK,
     CLOSE_INTERFACE,
-    CONFIRM
+    CONFIRM,
 }

@@ -7,7 +7,7 @@ plugins {
 
 version = "1.0.0"
 project.extra["PluginName"] = "One Click Herblore" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "A one click herblore script." // This is the description that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "Makes potions by clicking anywhere on your screen, supports almost every potion." // This is the description that is used in the external plugin manager panel
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")

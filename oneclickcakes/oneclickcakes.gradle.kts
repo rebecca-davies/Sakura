@@ -5,9 +5,9 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.0.0"
+version = "1.0.1"
 project.extra["PluginName"] = "One Click Cakes" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "A one click cake stall thieving script." // This is the description that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "Thieves cakes by clicking anywhere on your screen and banks them at Ardougne." // This is the description that is used in the external plugin manager panel
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")

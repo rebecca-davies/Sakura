@@ -5,9 +5,9 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.0.2"
+version = "1.0.3"
 project.extra["PluginName"] = "Anonymizer" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "An all-in-one anonymous utility." // This is the description that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "An all-in-one anonymous utility to hide your gameplay during screen capture." // This is the description that is used in the external plugin manager panel
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
