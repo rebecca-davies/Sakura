@@ -1,13 +1,9 @@
-package net.runelite.client.plugins.oneclickherblore
+package net.runelite.client.plugins.oneclickbankstander
 
 import com.google.inject.Provides
 import net.runelite.api.*
-import net.runelite.api.events.ClientTick
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.MenuOptionClicked
-import net.runelite.api.events.ScriptCallbackEvent
-import net.runelite.api.events.ScriptPostFired
-import net.runelite.api.events.ScriptPreFired
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.callback.ClientThread
 import net.runelite.api.widgets.WidgetInfo.INVENTORY as inventory
@@ -15,31 +11,30 @@ import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
-import net.runelite.client.plugins.oneclickherblore.OneClickHerbloreConfig.*
-import net.runelite.client.plugins.oneclickherblore.api.entry.Entries
-import net.runelite.client.plugins.oneclickherblore.api.inventory.Inventory
-import net.runelite.client.plugins.oneclickherblore.client.banking
-import net.runelite.client.plugins.oneclickherblore.client.findGameObject
-import net.runelite.client.plugins.oneclickherblore.client.inventoryContains
-import net.runelite.client.plugins.oneclickherblore.client.inventoryContainsAll
-import net.runelite.client.plugins.oneclickherblore.util.*
+import net.runelite.client.plugins.oneclickbankstander.OneClickBankstanderConfig.*
+import net.runelite.client.plugins.oneclickbankstander.util.Log
+import net.runelite.client.plugins.oneclickbankstander.api.entry.Entries
+import net.runelite.client.plugins.oneclickbankstander.api.inventory.Inventory
+import net.runelite.client.plugins.oneclickbankstander.client.banking
+import net.runelite.client.plugins.oneclickbankstander.client.findGameObject
+import net.runelite.client.plugins.oneclickbankstander.client.inventoryContains
+import net.runelite.client.plugins.oneclickbankstander.client.inventoryContainsAll
 import org.pf4j.Extension
 import javax.inject.Inject
 import kotlin.properties.Delegates
-import net.runelite.api.widgets.WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER as bankInventory
 import net.runelite.api.widgets.WidgetInfo.BANK_ITEM_CONTAINER as bank
 
 
 @Extension
 @PluginDescriptor(
-    name = "One Click Herblore",
+    name = "One Click Bankstander",
     description = ":Prayje:",
-    tags = ["rebecca, oneclick, one click, herblore"]
+    tags = ["rebecca, oneclick, one click, bankstander"]
 )
-class OneClickHerblorePlugin : Plugin() {
+class OneClickBankstanderPlugin : Plugin() {
 
     @Inject
-    private lateinit var config: OneClickHerbloreConfig
+    private lateinit var config: OneClickBankstanderConfig
 
     @Inject
     lateinit var client: Client
@@ -63,8 +58,8 @@ class OneClickHerblorePlugin : Plugin() {
     private var closed = false
 
     @Provides
-    fun provideConfig(configManager: ConfigManager): OneClickHerbloreConfig {
-        return configManager.getConfig(OneClickHerbloreConfig::class.java)
+    fun provideConfig(configManager: ConfigManager): OneClickBankstanderConfig {
+        return configManager.getConfig(OneClickBankstanderConfig::class.java)
     }
 
     override fun startUp() {
@@ -136,20 +131,16 @@ class OneClickHerblorePlugin : Plugin() {
                             return
                         }
                         event.useOn(inventory.getItem(config.potion().ingredients.first()), inventory.getItem(config.potion().ingredients.last()))
-                        state = States.CONFIRM
                         return
                     }
                     States.OPEN_BANK -> {
                         bankObject?.let {
                             event.use(it)
-                            closed = false
-                            mixing = false
                             return
                         }
                     }
                     States.CLOSE_INTERFACE -> {
                         event.closeBank()
-                        closed = true
                     }
                     States.IDLE -> {}
                 }
@@ -163,6 +154,13 @@ class OneClickHerblorePlugin : Plugin() {
 
     private fun handleLogic() {
         with(inventories) {
+            if(state == States.DEPOSIT || state == States.WITHDRAW || state == States.OPEN_BANK) {
+                if(!client.banking()) {
+                    state = States.OPEN_BANK
+                    closed = false
+                    return
+                }
+            }
             if(client.banking()) {
                 if(client.inventoryContains(config.potion().product) && !client.inventoryContains(config.potion().ingredients)) {
                     state = States.DEPOSIT
@@ -174,6 +172,7 @@ class OneClickHerblorePlugin : Plugin() {
                 }
                 if(!closed && (client.inventoryContains(config.potion().ingredients) || client.inventoryContainsAll(config.potion().ingredients) && !mixing)) {
                     state = States.CLOSE_INTERFACE
+                    closed = true
                     return
                 }
             }
@@ -197,27 +196,16 @@ class OneClickHerblorePlugin : Plugin() {
                 }
             }
             if(client.inventoryContains(config.potion().product) && !client.inventoryContains(config.potion().ingredients)) {
-                if(!client.banking()) {
-                    state = States.OPEN_BANK
-                    return
-                }
+                mixing = false
                 index = 0
                 state = States.DEPOSIT
                 return
             }
             if(!client.inventoryContains(config.potion().ingredients.first()) && !client.inventoryContains(config.potion().ingredients.last()) && !client.inventoryContains(config.potion().product)) {
-                if(!client.banking()) {
-                    state = States.OPEN_BANK
-                    return
-                }
                 state = States.WITHDRAW
                 return
             }
             if((!client.inventoryContains(config.potion().ingredients.first()) || !client.inventoryContains(config.potion().ingredients.last())) && !client.inventoryContains(config.potion().product)) {
-                if(!client.banking()) {
-                    state = States.OPEN_BANK
-                    return
-                }
                 state = States.WITHDRAW
                 return
             }

@@ -5,9 +5,9 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.0.3"
-project.extra["PluginName"] = "One Click Herblore" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "Makes potions by clicking anywhere on your screen, supports almost every potion." // This is the description that is used in the external plugin manager panel
+version = "1.0.0"
+project.extra["PluginName"] = "One Click Bankstander" // This is the name that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "Perform skills near a bank in one click." // This is the description that is used in the external plugin manager panel
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
