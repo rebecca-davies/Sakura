@@ -46,5 +46,5 @@ fun Client.findNpc(id: Int): NPC? {
 }
 
 fun Client.banking(): Boolean {
-    return this.getItemContainer(InventoryID.BANK) != null
+    return this.getWidget(WidgetInfo.BANK_ITEM_CONTAINER) != null
 }

@@ -77,6 +77,7 @@ class OneClickHerblorePlugin : Plugin() {
     }
 
     private fun reset() {
+        state = States.IDLE
         performAction = true
         prev = 0
         timeout = 0
@@ -172,8 +173,9 @@ class OneClickHerblorePlugin : Plugin() {
                     state = States.WITHDRAW
                     return
                 }
-                if(!closed && (client.inventoryContains(config.potion().ingredients) || client.inventoryContainsAll(config.potion().ingredients) && !mixing)) {
+                if(!closed && (client.inventoryContains(config.potion().ingredients) || (client.inventoryContainsAll(config.potion().ingredients) && !mixing))) {
                     state = States.CLOSE_INTERFACE
+                    index = 0
                     return
                 }
             }
@@ -201,7 +203,6 @@ class OneClickHerblorePlugin : Plugin() {
                     state = States.OPEN_BANK
                     return
                 }
-                index = 0
                 state = States.DEPOSIT
                 return
             }
