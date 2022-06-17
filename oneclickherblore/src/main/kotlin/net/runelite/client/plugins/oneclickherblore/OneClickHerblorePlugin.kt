@@ -148,7 +148,6 @@ class OneClickHerblorePlugin : Plugin() {
                     }
                     States.CLOSE_INTERFACE -> {
                         event.closeBank()
-                        closed = true
                         return
                     }
                     States.IDLE -> {}
@@ -157,14 +156,13 @@ class OneClickHerblorePlugin : Plugin() {
         }
         if(event.menuOption.equals("Walk here", ignoreCase = true)) {
             event.consume()
-            return;
+            return
         }
     }
 
     private fun handleLogic() {
         with(inventories) {
             if(client.banking()) {
-                closed = false
                 if(client.getItemContainer(InventoryID.INVENTORY) == null) {
                     state = States.WITHDRAW
                     return
@@ -179,6 +177,7 @@ class OneClickHerblorePlugin : Plugin() {
                 }
                 if(!closed && client.inventoryContainsAll(config.potion().ingredients)) {
                     state = States.CLOSE_INTERFACE
+                    closed = true
                     index = 0
                     return
                 }
@@ -205,6 +204,7 @@ class OneClickHerblorePlugin : Plugin() {
             if(client.inventoryContains(config.potion().product) && !client.inventoryContains(config.potion().ingredients)) {
                 if(!client.banking()) {
                     state = States.OPEN_BANK
+                    closed = false
                     return
                 }
                 state = States.DEPOSIT
@@ -213,6 +213,7 @@ class OneClickHerblorePlugin : Plugin() {
             if(!client.inventoryContains(config.potion().ingredients.first()) && !client.inventoryContains(config.potion().ingredients.last()) && !client.inventoryContains(config.potion().product)) {
                 if(!client.banking()) {
                     state = States.OPEN_BANK
+                    closed = false
                     return
                 }
                 state = States.WITHDRAW
@@ -221,6 +222,7 @@ class OneClickHerblorePlugin : Plugin() {
             if((!client.inventoryContains(config.potion().ingredients.first()) || !client.inventoryContains(config.potion().ingredients.last())) && !client.inventoryContains(config.potion().product)) {
                 if(!client.banking()) {
                     state = States.OPEN_BANK
+                    closed = false
                     return
                 }
                 state = States.WITHDRAW

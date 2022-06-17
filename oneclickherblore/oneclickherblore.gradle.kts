@@ -5,7 +5,7 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "1.0.5"
+version = "1.0.6"
 project.extra["PluginName"] = "One Click Herblore" // This is the name that is used in the external plugin manager panel
 project.extra["PluginDescription"] = "Makes potions by clicking anywhere on your screen, supports almost every potion." // This is the description that is used in the external plugin manager panel
 
