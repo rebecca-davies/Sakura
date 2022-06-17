@@ -105,7 +105,7 @@ class OneClickHerblorePlugin : Plugin() {
         with(inventories) {
             with(events) {
                 handleLogic()
-                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "state = $state performAction = $performAction", "")
+                log.info("STATE = $state SENT CLICK = $performAction")
                 if(!performAction || timeout != 0) {
                     event.consume()
                     return
