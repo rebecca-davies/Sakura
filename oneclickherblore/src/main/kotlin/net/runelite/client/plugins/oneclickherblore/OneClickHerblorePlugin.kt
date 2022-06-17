@@ -79,12 +79,11 @@ class OneClickHerblorePlugin : Plugin() {
     private fun reset() {
         state = States.IDLE
         performAction = true
+        mixing = false
+        closed = false
         prev = 0
         timeout = 0
-        mixing = false
         index = 0
-        closed = false
-
     }
 
     private var state by Delegates.observable(States.IDLE) { _, previous, current ->
@@ -143,7 +142,6 @@ class OneClickHerblorePlugin : Plugin() {
                     States.OPEN_BANK -> {
                         bankObject?.let {
                             event.use(it)
-                            closed = false
                             mixing = false
                             return
                         }
@@ -151,6 +149,7 @@ class OneClickHerblorePlugin : Plugin() {
                     States.CLOSE_INTERFACE -> {
                         event.closeBank()
                         closed = true
+                        return
                     }
                     States.IDLE -> {}
                 }
@@ -165,6 +164,11 @@ class OneClickHerblorePlugin : Plugin() {
     private fun handleLogic() {
         with(inventories) {
             if(client.banking()) {
+                closed = false
+                if(client.getItemContainer(InventoryID.INVENTORY) == null) {
+                    state = States.WITHDRAW
+                    return
+                }
                 if(client.inventoryContains(config.potion().product) && !client.inventoryContains(config.potion().ingredients)) {
                     state = States.DEPOSIT
                     return
@@ -173,7 +177,7 @@ class OneClickHerblorePlugin : Plugin() {
                     state = States.WITHDRAW
                     return
                 }
-                if(!closed && (client.inventoryContains(config.potion().ingredients) || (client.inventoryContainsAll(config.potion().ingredients) && !mixing))) {
+                if(!closed && client.inventoryContainsAll(config.potion().ingredients)) {
                     state = States.CLOSE_INTERFACE
                     index = 0
                     return
@@ -224,5 +228,7 @@ class OneClickHerblorePlugin : Plugin() {
             }
 
         }
+        state = States.IDLE
+        return
     }
 }
