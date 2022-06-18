@@ -55,13 +55,13 @@ class OneClickConstructionPlugin : Plugin() {
         return configManager.getConfig(OneClickConstructionConfig::class.java)
     }
 
-    var performAction = true
     lateinit var method: Constructables
     private var buildable: TileObject? = null
     private var built: TileObject? = null
     private var inUse = false
     private var butler: NPC? = null
-    private var consume = false
+    private var performAction = true
+    private var timeout = 0
 
     override fun startUp() {
         log.info("Starting One Click Construction")
@@ -73,14 +73,15 @@ class OneClickConstructionPlugin : Plugin() {
     }
 
     private fun reset() {
-        performAction = true
         method = config.method()
         inUse = false
+        performAction = true
+        timeout = 0
     }
 
-    var state by Delegates.observable(States.IDLE) { property, previous, current ->
+    private var state by Delegates.observable(States.IDLE) { property, previous, current ->
         if (previous != current) {
-            consume = false
+            performAction = true
         }
     }
 
@@ -89,9 +90,11 @@ class OneClickConstructionPlugin : Plugin() {
         method = config.method()
     }
 
-
     @Subscribe
     private fun onGameTick(event: GameTick) {
+        if(timeout > 0) {
+            timeout--
+        }
         butler = client.findNpc(BUTLERS)
         when(config.method()) {
             MAHOGANY_TABLE -> {
@@ -117,6 +120,7 @@ class OneClickConstructionPlugin : Plugin() {
     fun onNpcSpawned(event: NpcSpawned) {
         if(state != States.CALL_BUTLER && BUTLERS.contains(event.npc.id)) {
             if(inUse) {
+                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "YOINK", "")
                 inUse = false
                 return
             }
@@ -124,15 +128,14 @@ class OneClickConstructionPlugin : Plugin() {
     }
 
     @Subscribe
-    fun onWidgetPressed(event: WidgetPressed) {
-        consume = true
-    }
-    @Subscribe
     fun onMenuEntryClicked(event: MenuOptionClicked) {
         handleLogic()
-        if(consume) {
+        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "$state $performAction $inUse", "")
+        if(!performAction || timeout != 0) {
+            event.consume()
             return
         }
+        performAction = false
         with(entries) {
             when (state) {
                 States.BUILD -> {
@@ -157,6 +160,7 @@ class OneClickConstructionPlugin : Plugin() {
                 }
                 States.CALL_BUTLER -> {
                     if(client.getWidget(24248339) == null) {
+                        performAction = true
                         event.click(-1, 7602250)
                         return
                     }
@@ -165,6 +169,7 @@ class OneClickConstructionPlugin : Plugin() {
                 }
                 States.USE_BUTLER -> {
                     if(client.getWidget(14352385) == null) {
+                        performAction = true
                         butler?.let {
                             event.talkTo(butler!!, MenuAction.NPC_FIRST_OPTION)
                             return
@@ -184,12 +189,12 @@ class OneClickConstructionPlugin : Plugin() {
                 state = States.CALL_BUTLER
                 return
             }
-            if (!inUse && WidgetInfo.INVENTORY.quantity(method.plank) < 26) {
+            if (!inUse && WidgetInfo.INVENTORY.quantity(method.plank) < 26 && butler?.worldLocation?.distanceTo(client.localPlayer.worldLocation)!! <= 1) {
                 state = States.USE_BUTLER
                 return
             }
             if (buildable != null && WidgetInfo.INVENTORY.quantity(method.plank) >= method.amount) {
-                if (state == States.BUILD && client.getWidget(30015488) != null) {
+                if (client.getWidget(30015488) != null) {
                     state = States.PRESS_BUILD
                     return
                 }
@@ -197,13 +202,15 @@ class OneClickConstructionPlugin : Plugin() {
                 return
             }
             if (built != null) {
-                if (state == States.REMOVE && client.getWidget(14352385) != null) {
+                if (client.getWidget(14352385) != null) {
                     state = States.CONFIRM_REMOVE
                     return
                 }
                 state = States.REMOVE
                 return
             }
+            state = States.IDLE
+            return
         }
     }
 }
