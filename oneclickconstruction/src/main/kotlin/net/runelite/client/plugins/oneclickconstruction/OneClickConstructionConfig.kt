@@ -37,20 +37,10 @@ interface OneClickConstructionConfig : Config {
     fun method(): Constructables {
         return Constructables.OAK_LARDER
     }
-   /* @ConfigItem(
-        position = 4,
-        keyName = "runToUnnote",
-        name = "Unnote at Phials",
-        description = "Recommended to below level 40.",
-    )
-    @JvmDefault
-    fun runToUnnote(): Boolean {
-        return false
-    }*/
 
     enum class Constructables(val type: String, val buildable: Int, val built: Int, val childId: Int, val plank: Int, val amount: Int) {
-        OAK_LARDER("Oak Larder", 15403, 13566, 5, ItemID.OAK_PLANK, 0),
+        OAK_LARDER("Oak Larder", 15403, 13566, 5, ItemID.OAK_PLANK, 8),
         OAK_DOOR("Oak Door",15328, 13344, 4, ItemID.OAK_PLANK, 10),
-        MAHOGANY_TABLE("Mahogany table", 15298, 13298, 9, ItemID.MAHOGANY_PLANK, 0),
+        MAHOGANY_TABLE("Mahogany table", 15298, 13298, 9, ItemID.MAHOGANY_PLANK, 6),
     }
 }

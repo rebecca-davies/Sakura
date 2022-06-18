@@ -170,7 +170,6 @@ class OneClickConstructionPlugin : Plugin() {
                             return
                         }
                     }
-                    performAction = true
                     inUse = true
                     event.talk(1, 14352385)
                     return
@@ -181,7 +180,7 @@ class OneClickConstructionPlugin : Plugin() {
     }
     private fun handleLogic() {
         with(inventories) {
-            if (!inUse && (butler == null || butler?.worldLocation?.distanceTo(client.localPlayer.worldLocation)!! > 1)) {
+            if (!inUse && (butler == null || butler?.worldLocation?.distanceTo(client.localPlayer.worldLocation)!! > 2)) {
                 state = States.CALL_BUTLER
                 return
             }
