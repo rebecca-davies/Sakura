@@ -109,10 +109,6 @@ class OneClickConstructionPlugin : Plugin() {
                 buildable = client.findGameObject(method.buildable)
                 built = client.findGameObject(method.built)
             }
-            MYTH_CAPE -> {
-                buildable = client.findWallObject(method.buildable)
-                built = client.findWallObject(method.built)
-            }
         }
     }
 
@@ -120,7 +116,6 @@ class OneClickConstructionPlugin : Plugin() {
     fun onNpcSpawned(event: NpcSpawned) {
         if(state != States.CALL_BUTLER && BUTLERS.contains(event.npc.id)) {
             if(inUse) {
-                client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "YOINK", "")
                 inUse = false
                 return
             }
@@ -169,12 +164,13 @@ class OneClickConstructionPlugin : Plugin() {
                 }
                 States.USE_BUTLER -> {
                     if(client.getWidget(14352385) == null) {
-                        performAction = true
                         butler?.let {
+                            performAction = true
                             event.talkTo(butler!!, MenuAction.NPC_FIRST_OPTION)
                             return
                         }
                     }
+                    performAction = true
                     inUse = true
                     event.talk(1, 14352385)
                     return
@@ -193,6 +189,9 @@ class OneClickConstructionPlugin : Plugin() {
                 state = States.USE_BUTLER
                 return
             }
+            if(inUse && butler != null) {
+                return
+            }
             if (buildable != null && WidgetInfo.INVENTORY.quantity(method.plank) >= method.amount) {
                 if (client.getWidget(30015488) != null) {
                     state = States.PRESS_BUILD
@@ -202,7 +201,7 @@ class OneClickConstructionPlugin : Plugin() {
                 return
             }
             if (built != null) {
-                if (client.getWidget(14352385) != null) {
+                if (client.getWidget(14352385)?.getChild(1)?.text == "Yes") {
                     state = States.CONFIRM_REMOVE
                     return
                 }
