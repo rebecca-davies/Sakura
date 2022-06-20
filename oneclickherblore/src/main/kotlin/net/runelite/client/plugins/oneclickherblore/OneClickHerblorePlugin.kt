@@ -94,7 +94,7 @@ class OneClickHerblorePlugin : Plugin() {
 
     @Subscribe
     private fun onGameTick(event: GameTick) {
-        bankObject = client.findGameObject("Bank chest")
+        bankObject = client.findGameObject("Bank chest", "Bank booth").takeIf { it?.actions?.contains("Bank") == true || it?.actions?.contains("Use") == true }
         if(timeout > 0) {
             timeout--
         }
@@ -141,7 +141,7 @@ class OneClickHerblorePlugin : Plugin() {
                     }
                     States.OPEN_BANK -> {
                         bankObject?.let {
-                            event.use(it)
+                            event.use(it, option = if(it.name.contains("chest")) MenuAction.GAME_OBJECT_FIRST_OPTION else MenuAction.GAME_OBJECT_SECOND_OPTION)
                             mixing = false
                             return
                         }

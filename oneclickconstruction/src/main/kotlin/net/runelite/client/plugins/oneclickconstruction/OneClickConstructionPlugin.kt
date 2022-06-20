@@ -5,8 +5,6 @@ import net.runelite.api.*
 import net.runelite.api.events.GameTick
 import net.runelite.api.events.MenuOptionClicked
 import net.runelite.api.events.NpcSpawned
-import net.runelite.api.events.WidgetClosed
-import net.runelite.api.events.WidgetPressed
 import net.runelite.api.widgets.WidgetInfo
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
@@ -162,17 +160,15 @@ class OneClickConstructionPlugin : Plugin() {
                     event.click(-1, 24248339)
                     return
                 }
-                States.USE_BUTLER -> {
-                    if(client.getWidget(14352385) == null) {
-                        butler?.let {
-                            performAction = true
-                            event.talkTo(butler!!, MenuAction.NPC_FIRST_OPTION)
-                            return
-                        }
+                States.FETCH -> {
+                        event.talk(1, 14352385)
+                        return
+                }
+                States.TALK_TO_BUTLER -> {
+                    butler?.let {
+                        event.talkTo(butler!!, MenuAction.NPC_FIRST_OPTION)
+                        return
                     }
-                    inUse = true
-                    event.talk(1, 14352385)
-                    return
                 }
                 else -> {}
             }
@@ -180,16 +176,20 @@ class OneClickConstructionPlugin : Plugin() {
     }
     private fun handleLogic() {
         with(inventories) {
-            if (!inUse && (butler == null || butler?.worldLocation?.distanceTo(client.localPlayer.worldLocation)!! > 2)) {
-                state = States.CALL_BUTLER
-                return
-            }
-            if (!inUse && WidgetInfo.INVENTORY.quantity(method.plank) < 26 && butler?.worldLocation?.distanceTo(client.localPlayer.worldLocation)!! <= 1) {
-                state = States.USE_BUTLER
-                return
-            }
-            if(inUse && butler != null) {
-                return
+            if(!inUse) {
+                if(client.getWidget(14352385)?.getChild(1)?.text?.contains("Fetch from bank", false) == true) {
+                    inUse = true
+                    state = States.FETCH
+                    return
+                }
+                if (butler == null || butler?.worldLocation?.distanceTo(client.localPlayer.worldLocation)!! > 3) {
+                    state = States.CALL_BUTLER
+                    return
+                }
+                if (WidgetInfo.INVENTORY.quantity(method.plank) < 26 && butler?.worldLocation?.distanceTo(client.localPlayer.worldLocation)!! <= 1) {
+                    state = States.TALK_TO_BUTLER
+                    return
+                }
             }
             if (buildable != null && WidgetInfo.INVENTORY.quantity(method.plank) >= method.amount) {
                 if (client.getWidget(30015488) != null) {

@@ -7,7 +7,8 @@ enum class States {
     PRESS_BUILD,
     CONFIRM_REMOVE,
     CALL_BUTLER,
-    USE_BUTLER,
+    TALK_TO_BUTLER,
     USE_BUTLER_START,
+    FETCH
     
 }
