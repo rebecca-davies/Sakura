@@ -45,6 +45,7 @@ interface OneClickHerbloreConfig : Config {
         BATTLEMAGE_POTION("Battlemage potion", listOf(ItemID.POTATO_CACTUS, ItemID.CADANTINE_BLOOD_POTION_UNF), ItemID.BATTLEMAGE_POTION3),
         SARADOMIN_BREW("Saradomin brew", listOf(ItemID.CRUSHED_NEST, ItemID.TOADFLAX_POTION_UNF), ItemID.SARADOMIN_BREW3),
         ANCIENT_BREW("Ancient brew", listOf(ItemID.NIHIL_DUST, ItemID.DWARF_WEED_POTION_UNF), ItemID.ANCIENT_BREW3),
+        SUPER_COMBAT_POTION(type = "Super combat potion", ingredients = listOf(ItemID.TORSTOL, ItemID.SUPER_ATTACK4, ItemID.SUPER_STRENGTH4, ItemID.SUPER_DEFENCE4), product = ItemID.SUPER_COMBAT_POTION4),
         SUPER_ANTIFIRE_POTION("Super antifire potion", listOf(ItemID.CRUSHED_SUPERIOR_DRAGON_BONES, ItemID.ANTIFIRE_POTION4), ItemID.SUPER_ANTIFIRE_POTION4);
 
         override fun toString(): String {
