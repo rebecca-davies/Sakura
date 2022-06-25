@@ -60,6 +60,7 @@ class OneClickHerblorePlugin : Plugin() {
     private var mixing = false
     private var performAction = true
     private var index = 0
+    private var ingredientIndex = 0
     private var closed = false
 
     @Provides
@@ -84,6 +85,7 @@ class OneClickHerblorePlugin : Plugin() {
         prev = 0
         timeout = 0
         index = 0
+        ingredientIndex = 0
     }
 
     private var state by Delegates.observable(States.IDLE) { _, previous, current ->
@@ -113,6 +115,17 @@ class OneClickHerblorePlugin : Plugin() {
                 performAction = false
                 when(state) {
                     States.WITHDRAW -> {
+                        if(config.potion() == Potions.SUPER_COMBAT_POTION) {
+                            if (ingredientIndex < config.potion().ingredients.size) {
+                                val item = config.potion().ingredients[ingredientIndex++]
+                                performAction = true
+                                bank.getItem(item)?.let {
+                                    event.clickItem(it, 1, bank)
+                                    return
+                                }
+                            }
+                            return
+                        }
                         val item = config.potion().ingredients.first { !client.inventoryContains(it) && prev != it }.also { prev = it }
                         performAction = true
                         bank.getItem(item)?.let {
@@ -133,6 +146,11 @@ class OneClickHerblorePlugin : Plugin() {
                         if(config.potion() == Potions.SERUM_207) {
                             event.useOn(inventory.getItemFromIndex(index), inventory.getItemFromIndex(index + 14))
                             index++
+                            return
+                        }
+                        if(config.potion() == Potions.SUPER_COMBAT_POTION) {
+                            event.useOn(inventory.getItem(config.potion().ingredients.first()), inventory.getItem(config.potion().ingredients[1]))
+                            States.CONFIRM
                             return
                         }
                         event.useOn(inventory.getItem(config.potion().ingredients.first()), inventory.getItem(config.potion().ingredients.last()))
@@ -169,6 +187,7 @@ class OneClickHerblorePlugin : Plugin() {
                 }
                 if(client.inventoryContains(config.potion().product) && !client.inventoryContains(config.potion().ingredients)) {
                     state = States.DEPOSIT
+                    ingredientIndex = 0
                     return
                 }
                 if(!client.inventoryContainsAll(config.potion().ingredients) && !client.inventoryContains(config.potion().product)) {
