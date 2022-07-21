@@ -5,7 +5,7 @@ plugins {
     kotlin("kapt") version "1.3.61"
 }
 
-version = "2.1.4"
+version = "2.1.5"
 project.extra["PluginName"] = "One Click Wintertodt" // This is the name that is used in the external plugin manager panel
 project.extra["PluginDescription"] = "Turns Wintertodt into a one click boss, enable it and click anywhere to play." // This is the description that is used in the external plugin manager panel
 

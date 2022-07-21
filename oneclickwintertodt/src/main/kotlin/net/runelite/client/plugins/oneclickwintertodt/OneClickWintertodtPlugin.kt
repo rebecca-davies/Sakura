@@ -243,7 +243,7 @@ class OneClickWintertodtPlugin : Plugin() {
                         }
                     }
                     States.ENABLE_RUN -> {
-                        event.click(-1, 10485783)
+                        event.click(-1, 10485787)
                         return
                     }
                     States.EAT -> {
